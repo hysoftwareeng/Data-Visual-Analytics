@@ -132,10 +132,44 @@ Now investigate the distribution of `Runtime` values and how it changes over yea
 ```{r}
 # TODO: Investigate the distribution of Runtime values and how it varies by Year and Budget
 avg_runtime_per_year = aggregate(Runtime~Year, df2, mean)
+avg_budget_per_year = aggregate(Budget~Year, df2, mean)
+avg_budget_per_runtime = aggregate(Budget~Runtime, df2, mean)
 
 ggplot(avg_runtime_per_year, aes(x=Year, y=Runtime)) + geom_point() + geom_smooth(method = "loess") +
   scale_x_continuous(breaks = round(seq(min((round(avg_runtime_per_year$Year/10) * 10)), max(round(avg_runtime_per_year$Year/10) * 10), by = 10),1)) +
   ggtitle("Trend of Average Runtime of Movies by Year")
+
+ggplot(avg_budget_per_year, aes(x=Year, y=Budget)) + geom_point() + geom_smooth(method = "loess") +
+  scale_x_continuous(breaks = round(seq(min((round(avg_budget_per_year$Year/10) * 10)), max(round(avg_budget_per_year$Year/10) * 10), by = 10),1)) +
+  ggtitle("Trend of Budget of Movies by Year")
+
+ggplot(avg_budget_per_runtime, aes(x=Budget, y=Runtime)) + geom_point() + geom_smooth(method = "loess") +
+  ggtitle("Trend of Budget of Movies by Runtime")
+
+bucketYears = function(year){
+  if (year >= 1880 & year < 1890) return ("1880s")
+  if (year >= 1890 & year < 1900) return ("1890s")
+  if (year >= 1900 & year < 1910) return ("1900s")
+  if (year >= 1910 & year < 1920) return ("1910s")
+  if (year >= 1920 & year < 1930) return ("1920s")
+  if (year >= 1930 & year < 1940) return ("1930s")
+  if (year >= 1940 & year < 1950) return ("1940s")
+  if (year >= 1950 & year < 1960) return ("1950s")
+  if (year >= 1960 & year < 1970) return ("1960s")
+  if (year >= 1970 & year < 1980) return ("1970s")
+  if (year >= 1980 & year < 1990) return ("1980s")
+  if (year >= 1990 & year < 2000) return ("1990s")
+  if (year >= 2000 & year < 2010) return ("2000s")	
+  if (year >= 2010 & year < 2020) return ("2010s")
+}
+
+df2$Decade = sapply(df2$Year, bucketYears)
+
+qplot(x=Decade, y=Runtime, data=df2, size=Budget)
+
+ggplot(df2, aes(reorder(Decade, Runtime, mean), Runtime, color=Decade)) +
+geom_boxplot() + coord_flip() +
+scale_x_discrete("Boxplot of Runtime of Movies by Decade")
 
 ```
 
