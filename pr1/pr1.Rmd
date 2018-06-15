@@ -187,6 +187,9 @@ For example, if there are a total of 3 genres: Drama, Comedy, and Action, a movi
 
 ```{r}
 # TODO: Replace Genre with a collection of binary columns
+genres = unlist(strsplit(df2$Genre, ','))
+genres = tolower(gsub(' ', '', genres))
+genres = unique(genres)
 ```
 
 Plot the relative proportions of movies having the top 10 most common genres.
