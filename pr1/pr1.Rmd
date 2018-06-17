@@ -165,15 +165,19 @@ bucketYears = function(year){
 
 df2$Decade = sapply(df2$Year, bucketYears)
 
-qplot(x=Decade, y=Runtime, data=df2, size=Budget)
+qplot(x=Decade, y=Runtime, data=df2, size=Budget) +
+  ggtitle("Relationship Between Runtime, Decade and Budget of Movies")
 
 ggplot(df2, aes(reorder(Decade, Runtime, mean), Runtime, color=Decade)) +
-geom_boxplot() + coord_flip() +
-scale_x_discrete("Boxplot of Runtime of Movies by Decade")
+  geom_boxplot() + coord_flip() +
+  xlab("Decade") +
+  ggtitle("Boxplot of Runtime of Movies by Decade")
 
 ggplot(df2, aes(reorder(Decade, Budget, mean), log(Budget), color=Decade)) +
-geom_boxplot() + coord_flip() +
-scale_x_discrete("Boxplot of Budget of Movies by Decade")
+  geom_boxplot() + coord_flip() +
+  ylab("Log of Budget") +
+  xlab("Decade") +
+  ggtitle("Boxplot of Budget of Movies by Decade")
 
 ```
 
@@ -247,7 +251,6 @@ runtime_genres_df = runtime_genres_df[!is.na(runtime_genres_df$Runtime),]
 runtime_genres_df$Runtime = as.numeric(as.character(runtime_genres_df$Runtime))
 
 ggplot(runtime_genres_df, aes(x=reorder(genre, Runtime), y=Runtime)) + geom_boxplot() + coord_flip() +
-  scale_x_discrete("genre") +
   xlab("Genre") + 
   ylab("Runtime") +
   ggtitle("Boxplot of Runtime Distribution for Top 10 Genres")
@@ -255,7 +258,7 @@ ggplot(runtime_genres_df, aes(x=reorder(genre, Runtime), y=Runtime)) + geom_boxp
 
 **Q**: Describe the interesting relationship(s) you observe. Are there any expected or unexpected trends that are evident?
 
-**A**: 
+**A**: Looking at the box plot above, we can see that short and animation films have shorter runtimes. Documentaries tend to have a medium runtime and all other genres of films have about the same median runtimes. It is expected for short films to have short runtimes, and genres such as adventure, action, drama, triller, crime to have long runtimes as these genres tend to produce box hits and have higher production costs. One surprising trend is that animation films tend to have short runtimes, as films such as the Pixel films tend to have long runtimes. Another unexpected trend is that documentary has the largest spread, it even includes the film with the longest runtime.  
 
 ## 4. Eliminate mismatched rows
 
