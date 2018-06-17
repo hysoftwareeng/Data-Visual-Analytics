@@ -496,26 +496,33 @@ Study the relationship between ratings and awards using graphs (awards here refe
 ratings_awards_imdb_df = data.frame(df2$imdbVotes, df2$imdbRating, df2$Awards_Won, df2$Awards_Nom)
 ratings_awards_tomato1_df = data.frame(df2$tomatoRating, df2$tomatoMeter, df2$Awards_Won, df2$Awards_Nom)
 ratings_awards_tomato2_df = data.frame(df2$tomatoFresh, df2$tomatoReviews, df2$Awards_Won, df2$Awards_Nom)
-ggpairs(ratings_awards_imdb_df)
-ggpairs(ratings_awards_tomato_df)
-ggpairs(ratings_awards_tomato2_df)
+ratings_imdb_ggp = ggpairs(ratings_awards_imdb_df, title="Comparing Awards against IMDB Factors")
+ratings_toma1_ggp = ggpairs(ratings_awards_tomato1_df, title="Comparing Awards against Rotten Tomatoes Factors Set 1")
+ratings_toma2_ggp = ggpairs(ratings_awards_tomato2_df, title="Comparing Awards against Rotten Tomatoes Factors Set 2")
+
+print(ratings_imdb_ggp, progress = F)
+print(ratings_toma1_ggp, progress = F) 
+print(ratings_toma2_ggp, progress = F) 
 ```
 
 **Q**: How good are these ratings in terms of predicting the success of a movie in winning awards or nominations? Is there a high correlation between two variables?
 
-**A**: 
+**A**: First looking at IMDB ratings, there does seem to be a correlation between imdbRatings and the awards nominated and won. We can see a strong increase in the number of awards as the ratings approach 7-7.5, the relationship then tends to invert as ratings inch higher, as rewards with really high ratings (e.g 9.5 - 10) do not seem to have more rewards won or nominations. The same relationship can be observed with tomatoRating, as the ratings approach 7.5-9, the number of rewards won and nominations are at the highest, this then tends to decrease as ratings get higher.
+
+We can also observe similiar positive relationships with tomatoMeter, tomatoReviews and tomatoFresh as related to awards won and nominated. These actually do not show the decrease in awards won and nominated as these factors increase beyond a certain value. 
 
 ## 9. Expected insights
 
-Come up with two new insights (backed up by data and graphs) that is expected. Here “new” means insights that are not an immediate consequence of one of the above tasks. You may use any of the columns already explored above or a different one in the dataset, such as `Title`, `Actors`, etc.
+Come up with two new insights (backed up by data and graphs) that is expected. Here "new" means insights that are not an immediate consequence of one of the above tasks. You may use any of the columns already explored above or a different one in the dataset, such as `Title`, `Actors`, etc.
 
 ```{r}
 # TODO: Find and illustrate two expected insights
-qplot(x=Decade, y=Gross, data=df2, size=Budget)
+qplot(x=Decade, y=Gross, data=df2, size=Budget) + ggtitle("Relationship Between Decade and Gross Revenue")
 
 ggplot(df2, aes(reorder(Decade, Gross, median), log(Gross), color=Decade)) +
-geom_boxplot() + coord_flip() +
-scale_x_discrete("Boxplot of Gross Revenue of Movies by Decade")
+  geom_boxplot() + coord_flip() +
+  scale_x_discrete("Boxplot of Gross Revenue of Movies by Decade") +
+  ggtitle("Distribution of Gross Revenue by Decade")
 
 
 ggplot(df2, aes(x=Gross, y=Domestic_Gross)) + geom_point() + geom_smooth(method = "loess") +
@@ -528,12 +535,12 @@ corr_gross = (cor(df2$Domestic_Gross, df2$Gross, use="complete.obs", method = "p
 
 **Q**: Expected insight #1.
 
-**A**: 
+**A**: For my first expected insight, I looked at the relationship between gross revenue as related to the year of the film. I expected the gross revenue to steadily increase as the years increased, as we know from earlier that budget increased with increasing years. As expected, the box plot above shows that the median does indeed line up by decade, with the most recent decades with the highest gross revenues. 
 
 
 **Q**: Expected insight #2.
 
-**A**: 
+**A**: For my second insight, I looked at the relationship between gross revenue and domestic gross revenue. I expected there to be a strong relationship between these two variables, as films tend to do well globally if they also do well domestically. As expected, there is a strong linear relationship between gross revenue and domestic gross revenue. Calculating the correlation with the Pearson method, the value came out to approximately 0.9397, which is very strong.
 
 
 ## 10. Unexpected insight
@@ -545,10 +552,11 @@ Come up with one new insight (backed up by data and graphs) that is unexpected a
 df_insight1 = data.frame(df2$imdbRating, df2$tomatoRating, log(df2$Gross), log(df2$Budget))
 corr_imdb_gross = (cor(df2$imdbRating, df2$Gross, use="complete.obs", method = "pearson"))
 corr_tomato_gross = (cor(df2$tomatoRating, df2$Gross, use="complete.obs", method = "pearson"))
-ggpairs(df_insight1)
+q10_ggp = ggpairs(df_insight1, title="Relationship Between Ratings and Gross Revenue and Budget")
+print(q10_ggp, progress = F)
 ```
 
 **Q**: Unexpected insight.
 
-**A**: 
+**A**: I compared the ratings from IMDB and Rotten Tomatoes with the gross revenue as well as budget to see if there is a relationship between. I originally thought that as budget increases, the ratings might be higher. As well as for films with higher ratings, the gross revenues should be higher as well. However, looking at the pairwise graphs above, there is not strong correlation between these factors. In addition, I calculated the Pearson correlations between IMDB ratings and gross revenue as well as Rotten Tomtaoes ratings with gross revenues, these values are 0.2446 and 0.2123 respectively, which show very weak correlation. 
 
