@@ -70,6 +70,8 @@ Load any R packages that you will need to use. You can come back to this chunk, 
 ```{r}
 library(ggplot2)
 library(GGally)
+#install.packages("reshape")
+library(reshape)
 ```
 
 If you are loading any non-standard packages (ones that have not been discussed in class or explicitly allowed for this project), please mention them below. Include any special instructions if they cannot be installed using the regular `install.packages('<pkg name>')` command.
@@ -363,6 +365,42 @@ _Note: The format of the `Awards` column is not standard; you may have to use re
 
 ```{r}
 # TODO: Convert Awards to 2 numeric columns: wins and nominations
+df2$Awards_mod = tolower(df2$Awards)
+df2$Awards_Split = strsplit(df2$Awards_mod, "\\,|\\ |\\.|\\&")
+
+different_win_nominations=vector()
+for (i in seq(1:nrow(df2))) {
+  awards_vector = unlist(df2$Awards_Split[i])
+  wins= 0
+  noms = 0
+  if ("win" %in% awards_vector) {
+    index = which(awards_vector == "win")
+    wins= wins + as.integer(awards_vector[index-1])
+  }
+  if ("wins" %in% awards_vector) {
+    index = which(awards_vector == "wins")
+    wins= wins + as.integer(awards_vector[index-1])
+  }
+  if ("won" %in% awards_vector) {
+    index = which(awards_vector == "won")
+    wins= wins + as.integer(awards_vector[index+1])
+  }
+  if ("nominated" %in% awards_vector) {
+    index = which(awards_vector == "nominated")
+    noms= noms + as.integer(awards_vector[index+2])
+  }
+  if ("nomination" %in% awards_vector) {
+    index = which(awards_vector == "nomination")
+    noms= noms + as.integer(awards_vector[index-1])
+  }
+  if ("nominations" %in% awards_vector) {
+    index = which(awards_vector == "nominations")
+    noms= noms + as.integer(awards_vector[index-1])
+  }
+  df2$Awards_Won[i] = wins
+  df2$Awards_Nom[i] = noms
+}
+
 ```
 
 **Q**: How did you construct your conversion mechanism? How many rows had valid/non-zero wins or nominations?
@@ -371,6 +409,18 @@ _Note: The format of the `Awards` column is not standard; you may have to use re
 
 ```{r}
 # TODO: Plot Gross revenue against wins and nominations
+ggplot(df2, aes(x=Awards_Won, y=log(Gross))) +
+  geom_point() + geom_smooth(method = "loess") +
+  xlab("Awards Won") +
+  ylab("Gross Revenue") +
+  ggtitle("Gross Revene by Awards Won")
+
+ggplot(df2, aes(x=Awards_Nom, y=log(Gross))) +
+  geom_point() + geom_smooth(method = "loess") +
+  xlab("Awards Nominated") +
+  ylab("Gross Revenue") +
+  ggtitle("Gross Revene by Awards Nominated")
+
 ```
 
 **Q**: How does the gross revenue vary by number of awards won and nominations received?
@@ -385,6 +435,9 @@ Investigate the pairwise relationships between these different descriptors using
 
 ```{r}
 # TODO: Illustrate how ratings from IMDb and Rotten Tomatoes are related
+ratings_df = data.frame(df2$imdbRating, df2$imdbVotes, df2$tomatoMeter, df2$tomatoFresh, df2$tomatoRating, df2$tomatoReviews)
+ggpairs(ratings_df) + ggtitle("Comparing Raitings Relationships of Movies")
+
 ```
 
 **Q**: Comment on the similarities and differences between the user ratings of IMDb and the critics ratings of Rotten Tomatoes.
@@ -399,6 +452,12 @@ Study the relationship between ratings and awards using graphs (awards here refe
 
 ```{r}
 # TODO: Show how ratings and awards are related
+ratings_awards_imdb_df = data.frame(df2$imdbVotes, df2$imdbRating, df2$Awards_Won, df2$Awards_Nom)
+ratings_awards_tomato1_df = data.frame(df2$tomatoRating, df2$tomatoMeter, df2$Awards_Won, df2$Awards_Nom)
+ratings_awards_tomato2_df = data.frame(df2$tomatoFresh, df2$tomatoReviews, df2$Awards_Won, df2$Awards_Nom)
+ggpairs(ratings_awards_imdb_df)
+ggpairs(ratings_awards_tomato_df)
+ggpairs(ratings_awards_tomato2_df)
 ```
 
 **Q**: How good are these ratings in terms of predicting the success of a movie in winning awards or nominations? Is there a high correlation between two variables?
@@ -411,6 +470,17 @@ Come up with two new insights (backed up by data and graphs) that is expected. H
 
 ```{r}
 # TODO: Find and illustrate two expected insights
+df_insight1 = data.frame(df2$imdbRating, df2$tomatoRating, log(df2$Gross))
+corr_imdb_gross = (cor(df2$imdbRating, df2$Gross, use="complete.obs", method = "pearson"))
+corr_tomato_gross = (cor(df2$tomatoRating, df2$Gross, use="complete.obs", method = "pearson"))
+ggpairs(df_insight1)
+
+ggplot(df2, aes(x=Gross, y=Domestic_Gross)) + geom_point() + geom_smooth(method = "loess") +
+  ylab("Domestic Gross") +
+  ggtitle("Comparing Relationship Between Gross Revenue and Domestic Gross Revenue")
+
+corr_gross = (cor(df2$Domestic_Gross, df2$Gross, use="complete.obs", method = "pearson"))
+
 ```
 
 **Q**: Expected insight #1.
