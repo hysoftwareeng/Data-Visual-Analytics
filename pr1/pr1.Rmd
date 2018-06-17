@@ -190,18 +190,57 @@ For example, if there are a total of 3 genres: Drama, Comedy, and Action, a movi
 genres = unlist(strsplit(df2$Genre, ','))
 genres = tolower(gsub(' ', '', genres))
 genres = unique(genres)
+
+genres_df = data.frame(matrix(nrow = nrow(df2), ncol = length(genres)))
+colnames(genres_df) = genres
+df2$Genres_mod = tolower(gsub(' ', '', df2$Genre))
+if ("Genre" %in% colnames(df2)){
+  df2 = subset(df2, select=-c(Genre))
+}
+
+genres_df[,] = 0
+for (item in genres) {
+  genres_df[grep(item, df2[,"Genres_mod"]), item] = 1
+}
+df2 = cbind(df2, genres_df)
 ```
 
 Plot the relative proportions of movies having the top 10 most common genres.
 
 ```{r}
 # TODO: Select movies from top 10 most common genres and plot their relative proportions
+sum_genres = data.frame(genre = names(genres_df), count=colSums(genres_df))
+sum_genres$proportion = sum_genres$count / nrow(df2)
+
+sum_genres = sum_genres[order(-sum_genres$proportion),]
+top_ten_genres = sum_genres[1:10, ]
+
+ggplot(top_ten_genres, aes(x=reorder(genre, proportion), y=proportion)) +
+  geom_bar(stat="identity") +
+  xlab("Genre") + ylab("Porportion") + ggtitle("Porportion of Movies in Top 10 Genres")
+
 ```
 
 Examine how the distribution of `Runtime` changes across genres for the top 10 most common genres.
 
 ```{r}
 # TODO: Plot Runtime distribution for top 10 most common genres
+runtime_genres_df = NULL
+for (name in top_ten_genres$genre) {
+  runtime_data = df2[df2[[name]]==1,c('Title','Runtime')]
+  runtime_data$genre = name
+  runtime_genres_df = rbind(runtime_genres_df, runtime_data)
+}
+
+runtime_genres_df = merge(runtime_genres_df, top_ten_genres[,c("genre","proportion")], by="genre")
+runtime_genres_df = runtime_genres_df[!is.na(runtime_genres_df$Runtime),]
+runtime_genres_df$Runtime = as.numeric(as.character(runtime_genres_df$Runtime))
+
+ggplot(runtime_genres_df, aes(x=reorder(genre, Runtime), y=Runtime)) + geom_boxplot() + coord_flip() +
+  scale_x_discrete("genre") +
+  xlab("Genre") + 
+  ylab("Runtime") +
+  ggtitle("Boxplot of Runtime Distribution for Top 10 Genres")
 ```
 
 **Q**: Describe the interesting relationship(s) you observe. Are there any expected or unexpected trends that are evident?
@@ -218,6 +257,40 @@ _Note: Do not remove the rows with `Gross == NA` at this point, just use this a 
 
 ```{r}
 # TODO: Remove rows with Year/Date/Released mismatch
+orig_rowcount = nrow(df2)
+df2$Released_Year = as.numeric(format(as.Date(df2$Released, format = "%Y-%m-%d"), "%Y"))
+df2$removal = 1
+for (i in seq(1:nrow(df2))) {
+  if (is.na(df2$Gross[i])) {
+    df2$removal[i] = 0
+  }
+  else if (is.na(df2$Year[i])) {
+    if (is.na(df$Date[i]) | is.na(df2$Released_Year[i])) {
+      df2$removal[i] = 0
+    }
+    else if (!is.na(df2$Date[i]) & df2$Date[i] == df2$Released_Year[i]) {
+      df2$removal[i] = 0
+    }
+  }
+  else if (is.na(df2$Date[i])) {
+    if (is.na(df2$Released_Year[i])) {
+      df2$removal[i] = 0
+    }
+    else if (!is.na(df2$Year[i]) & df2$Year[i] == df2$Released_Year[i]) {
+      df2$removal[i] = 0
+    }
+  }
+  else if (is.na(df2$Released_Year[i])) {
+    if (!is.na(df2$Date[i]) & df2$Date[i] == df2$Year[i]) {
+      df2$removal[i] = 0
+    }
+  }
+  else if (!is.na(df2$Year[i]) & df2$Date[i] == df2$Year[i] & df2$Year[i] == df2$Released_Year[i]) {
+    df2$removal[i] = 0
+  }
+}
+
+df2 = subset(df2, removal == 0)
 ```
 
 **Q**: What is your precise removal logic, and how many rows remain in the resulting dataset?
