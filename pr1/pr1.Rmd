@@ -343,10 +343,10 @@ for (name in top_ten_genres$genre) {
 }
 
 qplot(x=log(Budget), y=log(Gross), data=df_q5, color=Genre, facets=Genre~Runtime_Binary) +
-  stat_smooth(se = FALSE,colour="black")
+  stat_smooth(se = FALSE,colour="black") + ggtitle("Budget vs Gross Revenue by Genre")
 
-qplot(x=log(Gross), y=Runtime, data=df_q5, color=Genre, facets=Runtime_Binary~Genre) +
-  stat_smooth(se = FALSE,colour="black")
+qplot(x=log(Runtime), y=log(Gross), data=df_q5, color=Genre, facets=Runtime_Binary~Genre) +
+  stat_smooth(se = FALSE,colour="black") + ggtitle("Runtime vs Gross Revenue by Genre")
 
 ggplot(df_q5, aes(x=reorder(Genre, Gross, mean), y=Gross)) + geom_boxplot() + coord_flip() +
   scale_x_discrete("Genre") +
@@ -358,7 +358,13 @@ ggplot(df_q5, aes(x=reorder(Genre, Gross, mean), y=Gross)) + geom_boxplot() + co
 
 **Q**: Did you find any observable relationships or combinations of Budget/Runtime/Genre that result in high Gross revenue? If you divided the movies into different subsets, you may get different answers for them - point out interesting ones.
 
-**A**: 
+**A**: I first divided movies into long and short with those longer than 40 minutes being long and shorter being short. Then, I looked at the relationships between the factors for the movies in the top ten genres to avoid clutter. 
+
+1. Budget and Gross Revenue. There is a strong trend between Budget and Gross Revenue in almost all the categories for long films. In the box plot, the positive linear relationship is quite obvious. So we can conclude high budget results in high gross revenue. This is also noticeable in shorter films, but not enough data is available. 
+
+2. Runtime and Gross Revenue. Ther is some correlation between runtime and gross revenue. In genres such as action, thrillers and documentaries, we can see there is an upward trend as runtime increases. Even in shorter films, there are some data to support this. However, many genres, such as adventure and dramas show very little correlation. 
+
+3. Genre and Gross Revenue. Looking at the boxplot above, we can see that genres such as Animation, Adventure, and Actions have higher median gross revenues. Documentaries have the lowest gross revenue in the top ten, as expected by common sense.This means there is a relationship between genres and gross revenue, with some genres raking in more revenue than other genres. 
 
 ```{r}
 # TODO: Investigate if Gross Revenue is related to Release Month
@@ -377,6 +383,8 @@ ggplot(df5, aes(x=reorder(Released_Month, Gross, median), y=log(Gross))) +
   ylab("Gross Revenue") +
   ggtitle("Gross Revene by Movie Release Month")
 ```
+
+**A**: Gross Revenue is indeed related to release month, we can see that June, December, July, May and November are the top months for gross revenue, these are indeed the holiday months or the months when kids are on vacation. Fall months (September, October) tend to have the lowest gross revenue. 
 
 ## 6. Process `Awards` column
 
