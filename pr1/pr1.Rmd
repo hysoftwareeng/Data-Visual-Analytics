@@ -277,7 +277,7 @@ for (i in seq(1:nrow(df2))) {
   if (is.na(df2$Gross[i])) {
     df2$removal[i] = 0
   }
-  else if (is.na(df2$Year[i]) & is.na(df2$Date[i]) & df2$Date[i]) {
+  else if (is.na(df2$Year[i]) & is.na(df2$Date[i]) & is.na(df2$Date[i])) {
     df2$removal[i] = 0
   }
   else if (is.na(df2$Year[i])) {
@@ -311,7 +311,17 @@ df2 = subset(df2, removal == 0)
 
 **Q**: What is your precise removal logic, and how many rows remain in the resulting dataset?
 
-**A**: 
+**A**: I used the following logic to denote if rows should be kept, note that these are checked in order, so some redundant logic are removed, such as not checking if Released and Date are NA in 4, as they would have passed in the above steps. 
+1. Keep if Gross is NA
+2. Keep if all three of Year, Date and Released are NA
+3. If Year is NA, and either Released is NA or Date is NA
+4. If Year is NA, and Date is equal to Released
+5. If Date is NA, keep if Released is also NA
+6. If Date is NA, and Released is equal to Year
+7. If Released is NA, check if Date and Year are equal
+8. Check if all three are equal
+
+This ensures that we only keep all the valid rows. Prior to the removal logic, there were 40,000 rows, after the removal, there remains 38,982 rows. 
 
 ## 5. Explore `Gross` revenue
 
