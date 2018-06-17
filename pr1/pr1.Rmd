@@ -472,13 +472,18 @@ Investigate the pairwise relationships between these different descriptors using
 ```{r}
 # TODO: Illustrate how ratings from IMDb and Rotten Tomatoes are related
 ratings_df = data.frame(df2$imdbRating, df2$imdbVotes, df2$tomatoMeter, df2$tomatoFresh, df2$tomatoRating, df2$tomatoReviews)
-ggpairs(ratings_df) + ggtitle("Comparing Raitings Relationships of Movies")
+ratings_ggp = ggpairs(ratings_df, title="Comparing Ratings Relationships of Movies")
+print(ratings_ggp, progress = F) 
 
 ```
 
 **Q**: Comment on the similarities and differences between the user ratings of IMDb and the critics ratings of Rotten Tomatoes.
 
-**A**: 
+**A**: First of all, we can see there is a strong linear relationship between imdbRating and tomatoRating, with a strong correlation of 0.796. This says that the generic public generally agrees with the critics when it comes to rating movies. 
+
+There is also a strong correlation between tomatoFresh as well as imdbVotes as well as tomatoReviews and imdbVotes. This might suggest that Rotten Tomatoes reviews tend to influence more votes on IMDB. 
+
+It is also interesting to note that imdbVotes have almost no relationship to imdbRating, so the number of votes do not influence higher ratings. However, there is more correlation among the Rotten Tomatoes categories, we see a very strong linear relationship between tomatoReviews and tomatoFresh, as well as tomatoRating and tomatoMeter. Some other categories tend to have little correlation, such as between tomatoRating and tomatoReviews, or between tomatoFresh and tomatoMeter. 
 
 ## 8. Ratings and awards
 
