@@ -381,7 +381,7 @@ ggplot(df5, aes(x=reorder(Released_Month, Gross, median), y=log(Gross))) +
   scale_x_discrete("Released_Month") +
   xlab("Released Month") +
   ylab("Gross Revenue") +
-  ggtitle("Gross Revene by Movie Release Month")
+  ggtitle("Gross Revenue by Movie Release Month")
 ```
 
 **A**: Gross Revenue is indeed related to release month, we can see that June, December, July, May and November are the top months for gross revenue, these are indeed the holiday months or the months when kids are on vacation. Fall months (September, October) tend to have the lowest gross revenue. 
@@ -430,11 +430,18 @@ for (i in seq(1:nrow(df2))) {
   df2$Awards_Nom[i] = noms
 }
 
+valid_wins=nrow(subset(df2,Awards_Won != 0))
+valid_noms=nrow(subset(df2,Awards_Nom != 0))
+valid_wins_noms_or = nrow(subset(df2, Awards_Won != 0 | Awards_Nom != 0))
+valid_wins_noms_and = nrow(subset(df2, Awards_Won != 0 & Awards_Nom != 0))
+
 ```
 
 **Q**: How did you construct your conversion mechanism? How many rows had valid/non-zero wins or nominations?
 
-**A**: 
+**A**: I first split the string for Awards in df2 into into string vectors. Then, I iterated all the rows in df2 one by one, initializing the number of wins and nominations to 0. Then unlisted the vector into strings. Then, I looked for keywords in the unlisted strings. I know from looking at the Awards column that the number precedes keywords "win" and "wins", and succeeds "won". So I looked for these keywords then found the number index position accordingly. These are then accumulated to the current wins. A similiar technique was used for nominations with the keywords "nomination", "nominations" and "nominated". These values are then set to two new columns in df2 for the current row. 
+
+Looking at statistics, there are 10,264 rows with valid wins, 10,684 with valid nominations. In addition, there are 7,024 with both valid wins and nominations, and 13922 rows with either a valid nomination or win.  
 
 ```{r}
 # TODO: Plot Gross revenue against wins and nominations
@@ -454,7 +461,7 @@ ggplot(df2, aes(x=Awards_Nom, y=log(Gross))) +
 
 **Q**: How does the gross revenue vary by number of awards won and nominations received?
 
-**A**: 
+**A**: There is a weak positive relationship between number of awards won and gross revenue as well as number of nominations and gross revenue. For both awards and nominations, the gross revenue tends to increase dramatically from 0 to 20. Then onwards ther is no clear positive relationship and plateaus. 
 
 ## 7. Movie ratings from IMDb and Rotten Tomatoes
 
