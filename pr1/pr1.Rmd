@@ -14,7 +14,7 @@ In this project, you will explore a dataset that contains information about movi
 
 # Objective
 
-Your goal is to investigate the relationship between the movie descriptors and the box office success of movies, as represented by the variable `Gross`. This task is extremely important as it can help a studio decide which titles to fund for production, how much to bid on produced movies, when to release a title, how much to invest in marketing and PR, etc. This information is most useful before a title is released, but it is still very valuable after the movie is already released to the public (for example it can affect additional marketing spend or how much a studio should negotiate with on-demand streaming companies for “second window” streaming rights).
+Your goal is to investigate the relationship between the movie descriptors and the box office success of movies, as represented by the variable `Gross`. This task is extremely important as it can help a studio decide which titles to fund for production, how much to bid on produced movies, when to release a title, how much to invest in marketing and PR, etc. This information is most useful before a title is released, but it is still very valuable after the movie is already released to the public (for example it can affect additional marketing spend or how much a studio should negotiate with on-demand streaming companies for a second window's streaming rights).
 
 # Instructions
 
@@ -70,8 +70,6 @@ Load any R packages that you will need to use. You can come back to this chunk, 
 ```{r}
 library(ggplot2)
 library(GGally)
-#install.packages("reshape")
-library(reshape)
 ```
 
 If you are loading any non-standard packages (ones that have not been discussed in class or explicitly allowed for this project), please mention them below. Include any special instructions if they cannot be installed using the regular `install.packages('<pkg name>')` command.
@@ -173,13 +171,23 @@ ggplot(df2, aes(reorder(Decade, Runtime, mean), Runtime, color=Decade)) +
 geom_boxplot() + coord_flip() +
 scale_x_discrete("Boxplot of Runtime of Movies by Decade")
 
+ggplot(df2, aes(reorder(Decade, Budget, mean), log(Budget), color=Decade)) +
+geom_boxplot() + coord_flip() +
+scale_x_discrete("Boxplot of Budget of Movies by Decade")
+
 ```
 
 _Feel free to insert additional code chunks as necessary._
 
 **Q**: Comment on the distribution as well as relationships. Are there any patterns or trends that you can observe?
 
-**A**: 
+**A**: In the first chart titled "Trend of Average Runtime of Movies by Year", we can see that there is a clear relationship between Year and Runtime. As years increased, the runtime of movies also increased. This relationship continued about the 1980s when it began to stabilize around 90 minutes. We can also see two major groups in the chart, movies made before the 1930s seem to average out around 20-30 minutes. Movies that were made after seem to average around 75 minutes or so.
+
+Analyzing Year and Budget, we can also see that as the years progressed, there has been a increase in the budget. From the early 1900s to about 1960s, this trend increase is small, as marked in the chart "Trend of Budget of Movies by Year". However, from the 1970s onwards, we have almost seen a linear increase in budget as the years also increased. 
+
+Looking at Budget and Runtime, we can see that there is indeed a positive correlation between these two variables, the trend line plotted shows there is a slight linear relationship that as budget increases, runtime tends to increase as well. 
+
+The above points are further validated by looking at the boxplot of the distributions of Runtime and Budget by decades. Looking at runtime, there is a strong trend showing runtimes have increased as years went by, as indicated by the medians in the boxplot. A similiar trend is observed for Budget, although the median seem to be the maximum during the 1990s. 
 
 ## 3. Encode `Genre` column
 
