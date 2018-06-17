@@ -264,11 +264,14 @@ for (i in seq(1:nrow(df2))) {
   if (is.na(df2$Gross[i])) {
     df2$removal[i] = 0
   }
+  else if (is.na(df2$Year[i]) & is.na(df2$Date[i]) & df2$Date[i]) {
+    df2$removal[i] = 0
+  }
   else if (is.na(df2$Year[i])) {
-    if (is.na(df$Date[i]) | is.na(df2$Released_Year[i])) {
+    if (is.na(df2$Date[i]) | is.na(df2$Released_Year[i])) {
       df2$removal[i] = 0
     }
-    else if (!is.na(df2$Date[i]) & df2$Date[i] == df2$Released_Year[i]) {
+    else if (df2$Date[i] == df2$Released_Year[i]) {
       df2$removal[i] = 0
     }
   }
@@ -276,16 +279,16 @@ for (i in seq(1:nrow(df2))) {
     if (is.na(df2$Released_Year[i])) {
       df2$removal[i] = 0
     }
-    else if (!is.na(df2$Year[i]) & df2$Year[i] == df2$Released_Year[i]) {
+    else if (df2$Year[i] == df2$Released_Year[i]) {
       df2$removal[i] = 0
     }
   }
   else if (is.na(df2$Released_Year[i])) {
-    if (!is.na(df2$Date[i]) & df2$Date[i] == df2$Year[i]) {
+    if (df2$Date[i] == df2$Year[i]) {
       df2$removal[i] = 0
     }
   }
-  else if (!is.na(df2$Year[i]) & df2$Date[i] == df2$Year[i] & df2$Year[i] == df2$Released_Year[i]) {
+  else if (df2$Date[i] == df2$Year[i] & df2$Year[i] == df2$Released_Year[i]) {
     df2$removal[i] = 0
   }
 }
@@ -305,6 +308,29 @@ _Note: To get a meaningful relationship, you may have to partition the movies in
 
 ```{r}
 # TODO: Investigate if Gross Revenue is related to Budget, Runtime or Genre
+df5 = df2
+df5$Runtime_Binary = ifelse(df5$Runtime > 40, "Long", "Short")
+df5 = df5[!is.na(df5$Runtime_Binary),]
+
+df_q5 = NULL
+for (name in top_ten_genres$genre) {
+  q5_data = df5[df5[[name]]==1,c('Runtime_Binary', 'Gross', 'Budget', 'Runtime')]
+  q5_data$Genre = name
+  df_q5 = rbind(df_q5, q5_data)
+}
+
+qplot(x=log(Budget), y=log(Gross), data=df_q5, color=Genre, facets=Genre~Runtime_Binary) +
+  stat_smooth(se = FALSE,colour="black")
+
+qplot(x=log(Gross), y=Runtime, data=df_q5, color=Genre, facets=Runtime_Binary~Genre) +
+  stat_smooth(se = FALSE,colour="black")
+
+ggplot(df_q5, aes(x=reorder(Genre, Gross, mean), y=Gross)) + geom_boxplot() + coord_flip() +
+  scale_x_discrete("Genre") +
+  xlab("Genre") + 
+  ylab("Gross") +
+  ggtitle("Boxplot of Gross Distribution for Top 10 Genres")
+
 ```
 
 **Q**: Did you find any observable relationships or combinations of Budget/Runtime/Genre that result in high Gross revenue? If you divided the movies into different subsets, you may get different answers for them - point out interesting ones.
@@ -313,6 +339,20 @@ _Note: To get a meaningful relationship, you may have to partition the movies in
 
 ```{r}
 # TODO: Investigate if Gross Revenue is related to Release Month
+df5$Released_Month = as.numeric(format(as.Date(df5$Released, format = "%Y-%m-%d"), "%m"))
+df5 = df5[!is.na(df5$Released_Month),]
+df5 = df5[!is.na(df5$Gross),]
+
+df5$Released_Month = as.numeric(as.character(df5$Released_Month))
+df5$Gross = as.numeric(as.character(df5$Gross))
+
+ggplot(df5, aes(x=reorder(Released_Month, Gross, median), y=log(Gross))) +
+  geom_boxplot() +
+  coord_flip() +
+  scale_x_discrete("Released_Month") +
+  xlab("Released Month") +
+  ylab("Gross Revenue") +
+  ggtitle("Gross Revene by Movie Release Month")
 ```
 
 ## 6. Process `Awards` column
