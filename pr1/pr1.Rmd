@@ -1,7 +1,9 @@
 ---
 title: "Project 1: Explore and Prepare Data"
-subtitle: "CSE6242 - Data and Visual Analytics - Summer 2018\n\nDue: Sunday, June 17, 2018 at 11:59 PM UTC-12:00 on T-Square"
-output: html_notebook
+subtitle: "CSE6242 - Data and Visual Analytics - Summer 2018\n\nDue: Sunday, June 17, 2018 at 11:59 PM UTC-12:00 on T-Square\n\n hyang390, 903320189"
+output: 
+  pdf_document: default
+  html_notebook: default
 ---
 
 _Note: This project involves getting data ready for analysis and doing some preliminary investigations. Project 2 will involve modeling and predictions on the same dataset, and will be released at a later date. Both projects will have equal weightage towards your grade. You may reuse some of the preprocessing/analysis steps from Project 1 in Project 2._
@@ -10,7 +12,7 @@ _Note: This project involves getting data ready for analysis and doing some prel
 
 In this project, you will explore a dataset that contains information about movies, including ratings, budget, gross revenue and other attributes. It was prepared by Dr. Guy Lebanon, and here is his description of the dataset:
 
-> The file [`movies_merged`](https://s3.amazonaws.com/content.udacity-data.com/courses/gt-cs6242/project/movies_merged) contains a dataframe with the same name that has 40K rows and 39 columns. Each row represents a movie title and each column represents a descriptor such as `Title`, `Actors`, and `Budget`. I collected the data by querying IMDb’s API (see [www.omdbapi.com](http://www.omdbapi.com/)) and joining it with a separate dataset of movie budgets and gross earnings (unknown to you). The join key was the movie title. This data is available for personal use, but IMDb’s terms of service do not allow it to be used for commercial purposes or for creating a competing repository.
+> The file [`movies_merged`](https://s3.amazonaws.com/content.udacity-data.com/courses/gt-cs6242/project/movies_merged) contains a dataframe with the same name that has 40K rows and 39 columns. Each row represents a movie title and each column represents a descriptor such as `Title`, `Actors`, and `Budget`. I collected the data by querying IMDB's API (see [www.omdbapi.com](http://www.omdbapi.com/)) and joining it with a separate dataset of movie budgets and gross earnings (unknown to you). The join key was the movie title. This data is available for personal use, but IMDB's terms of service do not allow it to be used for commercial purposes or for creating a competing repository.
 
 # Objective
 
@@ -96,7 +98,7 @@ dim(df2)
 
 **Q**: How many rows are left after removal? _Enter your response below._
 
-**A**: There are now 40000 rows left after the removal of rows that do not correspond to movies. 
+**A**: There are now 40,000 rows left after the removal of rows that do not correspond to movies. 
 
 ## 2. Process `Runtime` column
 
@@ -312,13 +314,21 @@ df2 = subset(df2, removal == 0)
 **Q**: What is your precise removal logic, and how many rows remain in the resulting dataset?
 
 **A**: I used the following logic to denote if rows should be kept, note that these are checked in order, so some redundant logic are removed, such as not checking if Released and Date are NA in 4, as they would have passed in the above steps. 
+
 1. Keep if Gross is NA
+
 2. Keep if all three of Year, Date and Released are NA
+
 3. If Year is NA, and either Released is NA or Date is NA
+
 4. If Year is NA, and Date is equal to Released
+
 5. If Date is NA, keep if Released is also NA
+
 6. If Date is NA, and Released is equal to Year
+
 7. If Released is NA, check if Date and Year are equal
+
 8. Check if all three are equal
 
 This ensures that we only keep all the valid rows. Prior to the removal logic, there were 40,000 rows, after the removal, there remains 38,982 rows. 
@@ -441,7 +451,7 @@ valid_wins_noms_and = nrow(subset(df2, Awards_Won != 0 & Awards_Nom != 0))
 
 **A**: I first split the string for Awards in df2 into into string vectors. Then, I iterated all the rows in df2 one by one, initializing the number of wins and nominations to 0. Then unlisted the vector into strings. Then, I looked for keywords in the unlisted strings. I know from looking at the Awards column that the number precedes keywords "win" and "wins", and succeeds "won". So I looked for these keywords then found the number index position accordingly. These are then accumulated to the current wins. A similiar technique was used for nominations with the keywords "nomination", "nominations" and "nominated". These values are then set to two new columns in df2 for the current row. 
 
-Looking at statistics, there are 10,264 rows with valid wins, 10,684 with valid nominations. In addition, there are 7,024 with both valid wins and nominations, and 13922 rows with either a valid nomination or win.  
+Looking at statistics, there are 10,264 rows with valid wins, 10,684 with valid nominations. In addition, there are 7,024 with both valid wins and nominations, and 13,922 rows with either a valid nomination or win.  
 
 ```{r}
 # TODO: Plot Gross revenue against wins and nominations
@@ -461,7 +471,7 @@ ggplot(df2, aes(x=Awards_Nom, y=log(Gross))) +
 
 **Q**: How does the gross revenue vary by number of awards won and nominations received?
 
-**A**: There is a weak positive relationship between number of awards won and gross revenue as well as number of nominations and gross revenue. For both awards and nominations, the gross revenue tends to increase dramatically from 0 to 20. Then onwards ther is no clear positive relationship and plateaus. 
+**A**: There is a weak positive relationship between number of awards won and gross revenue as well as number of nominations and gross revenue. For both awards and nominations, the gross revenue tends to increase dramatically from 0 to 25 awards/nominations. Then onwards ther is no clear positive relationship and plateaus. 
 
 ## 7. Movie ratings from IMDb and Rotten Tomatoes
 
