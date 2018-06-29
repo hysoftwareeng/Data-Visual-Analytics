@@ -18,8 +18,10 @@ load_ts <- function(csv_filename) {
     df <- read.csv(csv_filename, stringsAsFactors=FALSE)
     
     # TODO: convert timestamp column to POSIX datetime
+    poxix_dt <- as.POSIXct(df$timestamp, format = "%Y-%m-%d %H:%M:%S")
     
     # TODO: create xts time series from dataframe
+    s <- xts(df$value, order.by=poxix_dt)
     
     return(s)  # return time series
 }
@@ -42,16 +44,22 @@ find_anomalies <- function(s, window_size=11, threshold=4) {
 
     # TODO: Compute rolling mean
     # Hint: use rollapply() with align = 'right' and fill = 'extend'
+    s.mean <- rollapply(s, window_size, mean, align='right', fill='extend')
     
     # TODO: Compute rolling standard deviation
+    s.sd <- rollapply(s, window_size, sd, align='right', fill='extend')
 
     # TODO: Find anomalies
     # Hint: Look for data points that are more than (threshold * s.d.) away from mean
-
     # TODO: Filter anomalies to only keep extrema
     # Hint: Look for peaks and troughs
-
+    
     # TODO(optional): Further filtering to reduce duplicates and false positives
+    upper_bound <- s.mean + (threshold * s.sd)
+    lower_bound <- s.mean - (threshold * s.sd)
+    
+    anomalies = s[(s > upper_bound | s < lower_bound),]
+
 
     # Return results as a named list (include input params as well)
     return(list(s=s, window_size=window_size, threshold=threshold,
