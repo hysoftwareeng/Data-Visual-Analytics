@@ -5,7 +5,7 @@ library(testthat)
 context("Time Series Analysis")  # set a context for testing
 
 options(run.main=FALSE)  # suppress running "main" block
-source("ac4.R")  # load functions to be tested
+source("ac3.R")  # load functions to be tested
 options(run.main=TRUE)  # revert back to running "main" block
 
 # Define common variables and utility functions
