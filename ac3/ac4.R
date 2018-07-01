@@ -1,4 +1,6 @@
 # Activity: Time Series Analysis
+#hyang390
+#903320189
 
 library(zoo)  # basic time series package
 library(xts)  # eXtensible Time Series package
@@ -18,7 +20,7 @@ load_ts <- function(csv_filename) {
     df <- read.csv(csv_filename, stringsAsFactors=FALSE)
     
     # TODO: convert timestamp column to POSIX datetime
-    poxix_dt <- as.POSIXct(df$timestamp, format = "%Y-%m-%d %H:%M:%S")
+    poxix_dt <- as.POSIXct(df$timestamp, format="%Y-%m-%d %H:%M:%S")
     
     # TODO: create xts time series from dataframe
     s <- xts(df$value, order.by=poxix_dt)
@@ -57,9 +59,8 @@ find_anomalies <- function(s, window_size=11, threshold=4) {
     # TODO(optional): Further filtering to reduce duplicates and false positives
     upper_bound <- s.mean + (threshold * s.sd)
     lower_bound <- s.mean - (threshold * s.sd)
-    
-    anomalies = s[(s > upper_bound | s < lower_bound),]
 
+    anomalies = s[(s > upper_bound | s < lower_bound),]
 
     # Return results as a named list (include input params as well)
     return(list(s=s, window_size=window_size, threshold=threshold,
@@ -104,22 +105,25 @@ visualize <- function(res, wins=NA, title="Anomaly Detection Results") {
   #
   # Returns: Nothing
   
-  # Create a new plot
   plot.new()
   
   # Plot original time series
   if(!is.na(wins) && nrow(wins) > 0) {
-    plot(res$s, type="n", main=title)  # create a blank plot first
-    print(lines(res$s))  # then draw the time series
+    plot(x=index(res$s), y=res$s, type="n", main=title, xlab="Time", ylab="Data")  # create a blank plot first
+    lines(x=index(res$s), y=res$s)  # then draw the time series
   } else {
-    plot(res$s, main=title)
+    plot(x=index(res$s), y=res$s, xlab="Time", ylab="Data")
   }
   
   # TODO: Show moving average
+  lines(x=index(res$s.mean), y=res$s.mean, type="l", col="yellow")
   
   # TODO: Draw margins at mean +/- (threshold * s.d.)
+  lines(x=index(res$s.mean), y=(res$s.mean + (res$threshold*res$s.sd)), type="l", col="green")
+  lines(x=index(res$s.mean), y=(res$s.mean - (res$threshold*res$s.sd)), type="l", col="green")
   
   # TODO: Mark anomalies
+  points(x=index(res$anomalies), y=res$anomalies, col="red")
   
   # Optional highlight windows
   if(!is.na(wins) && nrow(wins) > 0) {
