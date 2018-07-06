@@ -1,0 +1,55 @@
+---
+title: "Homework 3: Regression Theory"
+subtitle: "CSE6242 - Data and Visual Analytics - Summer 2018\n\nDue: Sunday, July 8, 2018 at 11:59 PM UTC-12:00 on T-Square\n\n hyang390, 903320189"
+output: 
+  html_notebook: default
+  pdf_document: default
+---
+
+
+## 1. Data Preprocessing [50 points]
+
+```{r}
+mnist_train = read.csv('mnist/mnist_train.csv', header=FALSE)
+mnist_test = read.csv('mnist/mnist_test.csv', header=FALSE)
+
+train_0_1 = mnist_train[,((mnist_train[785,] == 0) | (mnist_train[785,] == 1))]
+train_3_5 = mnist_train[,((mnist_train[785,] == 3) | (mnist_train[785,] == 5))]
+
+test_0_1 = mnist_test[,((mnist_test[785,] == 0) | (mnist_test[785,] == 1))]
+test_3_5 = mnist_test[,((mnist_test[785,] == 3) | (mnist_test[785,] == 5))]
+
+
+print(sprintf("Dimension of train_0_1 are %i by %i: ", dim(train_0_1)[1], dim(train_0_1)[2]))
+print(sprintf("Dimension of train_3_5 are %i by %i: ", dim(train_3_5)[1], dim(train_3_5)[2]))
+print(sprintf("Dimension of test_0_1 are %i by %i: ", dim(test_0_1)[1], dim(test_0_1)[2]))
+print(sprintf("Dimension of test_3_5 are %i by %i: ", dim(test_3_5)[1], dim(test_3_5)[2]))
+
+train_data_0_1 = train_0_1[-785, ]
+train_data_3_5 = train_3_5[-785, ]
+train_labels_0_1 = train_0_1[785, ]
+train_labels_3_5 = train_3_5[785, ]
+
+test_data_0_1 = test_0_1[-785, ]
+test_data_3_5 = test_3_5[-785, ]
+test_labels_0_1 = test_0_1[785, ]
+test_labels_3_5 = test_3_5[785, ]
+
+rotate = function(x) t(apply(x, 2, rev))
+
+image(rotate(matrix(data=train_data_0_1[ , 4], nrow=28, ncol=28)), col=gray(0:255/255),
+      main="Image for 0 from train_data_0_1")
+
+image(rotate(matrix(data=test_data_0_1[ , 981], nrow=28, ncol=28)), col=gray(0:255/255),
+      main="Image for 1 from test_data_0_1")
+
+image(rotate(matrix(data=train_data_3_5[ , 2], nrow=28, ncol=28)), col=gray(0:255/255),
+      main="Image for 3 from train_data_3_5")
+
+image(rotate(matrix(data=test_data_3_5[ , 1050], nrow=28, ncol=28)), col=gray(0:255/255),
+      main="Image for 5 from test_data_3_5")
+```
+
+## 2. Theory [50 points]
+
+
