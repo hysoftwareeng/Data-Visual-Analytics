@@ -59,7 +59,7 @@ $$L(\theta) = \sum_{i=1}^{n} \log\big(1 + \exp(-y^{(i)} \big \langle\theta, x^{(
 To derive the gradient of the loss function with respect to model parameters, we take the partial derivative $$\frac{\partial L(\theta)}{\partial \theta_j}$$
 
 By the chain rule and the rule of summation of derivatives, we know that
-$$\frac{\partial L(\theta)}{\partial \theta_j} = \sum_{i=1}^{n} \frac{1}{1 + \exp(-y^{(i)} \big \langle\theta, x^{(i)}\big \rangle)}\frac{\partial}{\partial \theta_j} (1 + \exp(-y^{(i)} \big \langle\theta, x^{(i)}\big \rangle)\\$$
+$$\frac{\partial L(\theta)}{\partial \theta_j} = \sum_{i=1}^{n} \frac{1}{1 + \exp(-y^{(i)} \big \langle\theta, x^{(i)}\big \rangle)}\frac{\partial}{\partial \theta_j} (1 + \exp(-y^{(i)} \big \langle\theta, x^{(i)}\big \rangle))\\$$
 $$= \sum_{i=1}^{n} \frac{1}{1 + \exp(-y^{(i)} \big \langle\theta, x^{(i)}\big \rangle)} \exp(-y^{(i)} \big \langle\theta, x^{(i)} \big \rangle) \frac {\partial}{\partial \theta_j } (-y^{(i)} \big \langle\theta, x^{(i)}\big \rangle)$$
 We know that the derivative of of the term $$(-y^{(i)} \big \langle\theta, x^{(i)}\big \rangle)$$ is as follows:
 
@@ -71,9 +71,9 @@ By dividing $$\exp(-y^{(i)} \big \langle\theta, x^{(i)}\big \rangle)$$ top and b
 
 $$\frac{\partial L(\theta)}{\partial \theta_j} = \sum_{i=1}^{n} \frac{-y^{(i)}x^{(i)}_j}{1 + \exp(y^{(i)} \big \langle\theta, x^{(i)}\big \rangle)}$$
 
-Plugging the above into the update rule for stochastic gradient descent, we have the following:
+Plugging the above into the update rule for stochastic gradient descent, we have the following, as the negative sign of the update rule and the above equation cancel out:
 
-$$\theta_j \leftarrow \theta_j + \alpha \sum_{i=1}^{n} \frac{y^{(i)}x^{(i)}_j}{1 + \exp(y^{(i)} \big \langle\theta, x^{(i)}\big \rangle)}$$
+$$\theta_i \leftarrow \theta_j + \alpha \frac{y^{(i)}x^{(i)}_j}{1 + \exp(y^{(i)} \big \langle\theta, x^{(i)}\big \rangle)}, \forall j=1,...d$$
 
 We can express the following in pseudocode as follows:
 
@@ -97,15 +97,17 @@ while derivative_theta > threshold {
       z[i] = sum(theta[j]*x[i][j]) #for j from 0 to d
     }
   }
-  #summation of the resultant partial derivative, loop through, equivalent to picking x, y   randomly
-  for (i in 1:n){
+  #summation of the resultant partial derivative, loop through, 
+  for (index in 1:n) {
+    i = random(1, n) # randomly pick row for x_i, y_i
     delta = 0
     for (j in 1:d) {
       delta = delta + ((y[i] * x[i][j]) / (1 + exp(y[i] * z[i])))
     }
   }
-  theta = theta + alpha * delta #assuming vectorized code, for 0 to d for theta_j
-  derivative_theta = alpha * delta
+  
+  derivative_theta = alpha * delta #assuming vectorized code, for 0 to d for theta_j
+  theta = theta + derivative_theta 
 }
 
 return theta
