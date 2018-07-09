@@ -1,0 +1,27 @@
+---
+title: "Activity 4: Visualize Graph Data"
+subtitle: "CSE6242 - Data and Visual Analytics - Summer 2018\n\nDue: Sunday, July 16, 2018 at 7:59AM UTC-12:00 on T-Square\n\n hyang390, 903320189"
+output: 
+  pdf_document: default
+  html_notebook: default
+---
+
+
+The name of the graph/network dataset I used is the Facebook dataset from the Stanford Large Network Dataset Collection. Specifically, I used the facebook.tar.gz and used the files starting with nodeId 3437. According to the dataset information on the site, this dataset consists of "circles"/"friend lists" from Facebook and was collected from survey participants. The data has been anonymized, including user information and features. 
+
+```{r}
+#install.packages("igraph")
+library(igraph)
+
+data_edges = read.table("facebook/3437.edges")
+data_features = read.table("facebook/3437.feat")
+
+network = graph.data.frame(d=data_edges, vertices=data_features, directed=F)
+
+total_edges = ecount(network)
+total_vertices = vcount(network)
+unique_connected_vertices = length(union(x=data_edges$V1, y=data_edges$v2))
+disconnected_vertices = total_vertices - unique_connected_vertices
+
+```
+
