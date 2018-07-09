@@ -7,7 +7,7 @@ output:
 ---
 
 
-The name of the graph/network dataset I used is the Facebook dataset from the Stanford Large Network Dataset Collection. Specifically, I used the facebook.tar.gz and used the files starting with nodeId 3437. According to the dataset information on the site, this dataset consists of "circles"/"friend lists" from Facebook and was collected from survey participants. The data has been anonymized, including user information and features. 
+The name of the graph/network dataset I used is the Facebook dataset from the Stanford Large Network Dataset Collection. Specifically, I used the facebook.tar.gz and used the files starting with ID 3437. According to the dataset information on the site, this dataset consists of "circles"/"friend lists" from Facebook and was collected from survey participants. The data has been anonymized, including user information and features. 
 
 ```{r}
 #install.packages("igraph")
