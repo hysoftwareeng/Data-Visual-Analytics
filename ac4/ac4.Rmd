@@ -1,21 +1,25 @@
 ---
-title: "Activity 4: Visualize Graph Data"
-subtitle: "CSE6242 - Data and Visual Analytics - Summer 2018\n\nDue: Sunday, July 16, 2018 at 7:59AM UTC-12:00 on T-Square\n\n hyang390, 903320189"
-output: 
+title: 'Activity 4: Visualize Graph Data'
+subtitle: |-
+  CSE6242 - Data and Visual Analytics - Summer 2018
+  Due: Sunday, July 16, 2018 at 7:59AM UTC-12:00 on Canvas
+  hyang390, 903320189
+output:
   pdf_document: default
   html_notebook: default
+  html_document:
+    df_print: paged
 ---
 
 
-The name of the graph/network dataset I used is the Facebook dataset from the Stanford Large Network Dataset Collection. Specifically, I used the facebook.tar.gz and used the files starting with ID 3437. According to the dataset information on the site, this dataset consists of "circles"/"friend lists" from Facebook and was collected from survey participants. The data has been anonymized, including user information and features. 
+The name of the graph/network dataset I used is the Facebook dataset from the Stanford Large Network Dataset Collection. Specifically, I used the facebook.tar.gz and used the files starting with ID 3437. According to the dataset information on the site, this dataset consists of "circles"/"friend lists" from Facebook and was collected from survey participants. The data has been anonymized, including user information and features. This is one of the 10 available networks in the dataset. 
 
-```{r}
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
 #install.packages("igraph")
 library(igraph)
 
 data_edges = read.table("facebook/3437.edges")
 data_features = read.table("facebook/3437.feat")
-
 network = graph.data.frame(d=data_edges, vertices=data_features, directed=F)
 
 total_edges = ecount(network)
@@ -24,12 +28,12 @@ total_vertices = vcount(network)
 print(sprintf("The number of total vertices in the network is %i.", total_vertices))
 unique_connected_vertices = length(union(x=data_edges$V1, y=data_edges$v2))
 disconnected_vertices = total_vertices - unique_connected_vertices
-print(sprintf("The number of vertices that are not connected is %i.", disconnected_vertices))
+print(sprintf("The number of vertices that are connected is %i, not connected is %i.", unique_connected_vertices, disconnected_vertices))
 ```
 
 Based on the analysis of this network, I found that the total number of edges in this network is 9626, and the total number of vertices is 547. I also found an interesting statistic regarding the vertices by analyzing the unique vertices from the edges list and subtract those vertices from the total vertices. This gave me the number of vertices that are not part of an edge, and the number of such vertices is 13, meaning 534 vertices are part of edges in this network.
 
-```{r}
+```{r, echo=FALSE}
 V(network)$color= "orange"
 V(network)[degree(network)>=25]$color="blue"
 V(network)[degree(network)>=75]$color="red"
@@ -39,4 +43,4 @@ V(network)$size=4
 plot.igraph(network,vertex.label=NA,layout=layout_nicely)
 ```
 
-For the visualization of this netowrk, I plotted the network by highlighting the degree of the vertices, which is the number of graph edges a vertex touches. Based on the summary of the network,  I decided to highlight all vertices with degrees between 0-24 as orange, 25-74 as blue and 75 and beyond as red.
+For the visualization of this network, I plotted the network by highlighting the degree of the vertices, which is the number of graph edges a vertex touches. Based on the summary of the network,  I decided to highlight all vertices with degrees between 0-24 as orange, 25-74 as blue and 75 and beyond as red.
