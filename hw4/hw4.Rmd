@@ -53,11 +53,17 @@ image(rotate(matrix(data=test_data_3_5[ , 1050], nrow=28, ncol=28)), col=gray(0:
 ## 1. Implementation [35 points]
 ```{r}
 train = function(data, labels, alpha) {
-  
+  #initialize theta with random values
 }
 
 predict = function(theta, data) {
-  
+  #get the probability by pluging the matrix multiplication of data and theta into the sigmoid function
+  probability = 1/(1+exp(-(data %*% theta)))
+  if (probability >= 0.5) {
+    return (1)
+  } else {
+    return (-1)
+  }
 }
 
 ```
