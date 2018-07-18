@@ -54,6 +54,7 @@ image(rotate(matrix(data=test_data_3_5[ , 1050], nrow=28, ncol=28)), col=gray(0:
 ```{r}
 train = function(data, labels, alpha) {
   #initialize theta with random values
+  theta = as.matrix(runif(dim(data)[2], 0, 1))
 }
 
 predict = function(theta, data) {
