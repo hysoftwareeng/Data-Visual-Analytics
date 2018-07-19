@@ -53,8 +53,12 @@ image(rotate(matrix(data=test_data_3_5[ , 1050], nrow=28, ncol=28)), col=gray(0:
 ## 1. Implementation [35 points]
 ```{r}
 train = function(data, labels, alpha) {
-  #initialize theta with random values
+  #initialize theta with random values based on number of features (columns)
   theta = as.matrix(runif(dim(data)[2], 0, 1))
+  epochs = 100
+  for (epoch in 1:epochs){
+    bound_data_labels = cbind(data, labels) #bind for shuffling  
+  }
 }
 
 predict = function(theta, data) {
