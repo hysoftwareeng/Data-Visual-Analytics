@@ -1,15 +1,3 @@
----
-title: "Homework 3: Regression Theory"
-subtitle: "CSE6242 - Data and Visual Analytics - Summer 2018\n\nDue: Sunday, July 8, 2018 at 11:59 PM UTC-12:00 on T-Square\n\n hyang390, 903320189"
-output: 
-  html_notebook: default
-  pdf_document: default
----
-
-
-## Data Preprocessing
-
-```{r}
 mnist_train = read.csv('mnist/mnist_train.csv', header=FALSE)
 mnist_test = read.csv('mnist/mnist_test.csv', header=FALSE)
 
@@ -25,46 +13,36 @@ print(sprintf("Dimension of train_3_5 are %i by %i.", dim(train_3_5)[1], dim(tra
 print(sprintf("Dimension of test_0_1 are %i by %i.", dim(test_0_1)[1], dim(test_0_1)[2]))
 print(sprintf("Dimension of test_3_5 are %i by %i.", dim(test_3_5)[1], dim(test_3_5)[2]))
 
-train_data_0_1 = train_0_1[-785, ]
-train_data_3_5 = train_3_5[-785, ]
-train_labels_0_1 = train_0_1[785, ]
-train_labels_3_5 = train_3_5[785, ]
+train_data_0_1 = t(train_0_1[-785, ])
+train_data_3_5 = t(train_3_5[-785, ])
+train_labels_0_1 = t(train_0_1[785, ])
+train_labels_3_5 = t(train_3_5[785, ])
 
-test_data_0_1 = test_0_1[-785, ]
-test_data_3_5 = test_3_5[-785, ]
-test_labels_0_1 = test_0_1[785, ]
-test_labels_3_5 = test_3_5[785, ]
+test_data_0_1 = as.matrix(t(test_0_1[-785, ]))
+test_data_3_5 = t(test_3_5[-785, ])
+test_labels_0_1 = t(test_0_1[785, ])
+test_labels_3_5 = t(test_3_5[785, ])
 
-rotate = function(x) t(apply(x, 2, rev))
+train_data_0_1 <- cbind(1, train_data_0_1)
 
-image(rotate(matrix(data=train_data_0_1[ , 4], nrow=28, ncol=28)), col=gray(0:255/255),
-      main="Image for 0 from train_data_0_1")
 
-image(rotate(matrix(data=test_data_0_1[ , 981], nrow=28, ncol=28)), col=gray(0:255/255),
-      main="Image for 1 from test_data_0_1")
 
-image(rotate(matrix(data=train_data_3_5[ , 2], nrow=28, ncol=28)), col=gray(0:255/255),
-      main="Image for 3 from train_data_3_5")
+### end of processing ###
 
-image(rotate(matrix(data=test_data_3_5[ , 1050], nrow=28, ncol=28)), col=gray(0:255/255),
-      main="Image for 5 from test_data_3_5")
-```
 
-## 1. Implementation [35 points]
-```{r}
 train = function(data, labels, alpha) {
   #initialize theta with random values based on number of features (columns)
   theta = as.matrix(runif(dim(data)[2], 0, 1))
   epochs = 2
-  #for (epoch in 1:epochs){
+  for (epoch in 1:epochs){
     #bind for shuffling
     bound_data_labels = cbind(data, labels)
-    
+  
     #shuffle and unbind back to individual variables
     bound_data_labels_shuffled = bound_data_labels[sample(nrow(bound_data_labels)), ]
-    
-
-  #}
+  
+  
+  }
 }
 
 predict = function(theta, data) {
@@ -79,6 +57,3 @@ predict = function(theta, data) {
 
 
 theta = train(train_data_0_1, train_labels_0_1, 0.2)
-
-```
-
