@@ -10,6 +10,7 @@ output:
 ## Data Preprocessing
 
 ```{r}
+#setwd("C:/Users/Batmachine/Dropbox/OMSCS/CSE6242 - DVA/Assignments/hw4")
 mnist_train = read.csv('mnist/mnist_train.csv', header=FALSE)
 mnist_test = read.csv('mnist/mnist_test.csv', header=FALSE)
 
@@ -42,34 +43,119 @@ test_labels_3_5 = ifelse(test_labels_3_5 == 3, -1, 1)
 ```
 
 ## 1. Implementation [35 points]
-```{r}
-train = function(data, labels, alpha) {
-  #initialize theta with random values based on number of features (columns)
-  theta = as.matrix(runif(dim(data)[2], 0, 1))
-  epochs = 2
-  #for (epoch in 1:epochs){
-    #bind for shuffling
-    bound_data_labels = cbind(data, labels)
-    
-    #shuffle and unbind back to individual variables
-    bound_data_labels_shuffled = bound_data_labels[sample(nrow(bound_data_labels)), ]
-    
 
-  #}
-}
+In my implementation, I followed the algorithms I laid out in my previous homework 3 in combination with the exemplary homeworks. I first mapped all labels to -1 and 1, with the smaller number being -1 and the other being 1. Then, initialized theta to random values of a uniform distribution between 0 and 1. For shuffling in each epoch, I first combined the data and labels using "cbind", then shuffled them and unbound them to retrieve back the data and labels. This ensures that they are all shuffled in the same order. All other steps of the algorithm followed the derivations shown in the previous homework. As for convergence criteria, I used the difference of the loss function to check if the algorithm has converged. If after 20 epochs, the algorithm will just return the thetas to shorten runtimes. Please note that due to the fact that my accuracy for training data 0/1 is 100%, I was not able to include the incorrect images for the training set 0/1.
+
+```{r}
+rotate = function(x) t(apply(x, 2, rev))
 
 predict = function(theta, data) {
   #get the probability by pluging the matrix multiplication of data and theta into the sigmoid function
-  probability = 1/(1+exp(-(data %*% theta)))
-  if (probability >= 0.5) {
-    return (1)
-  } else {
-    return (-1)
+  probability = 1/(1+exp(-(as.matrix(data) %*% theta)))
+  labels = ifelse(probability > 0.5, 1, -1)
+  return (labels)
+}
+
+bind_and_shuffle = function(data, labels) {
+  bound_data_labels = cbind(data, labels)
+  bound_data_labels_shuffled = bound_data_labels[sample(nrow(bound_data_labels)), ]
+  return (bound_data_labels_shuffled)
+}
+
+accuracy = function(predicted_labels, true_labels) {
+  acc = sum(predicted_labels == true_labels) / dim(true_labels)[1]
+  return (acc)
+}
+
+train = function(data, labels, alpha){
+  threshold = 0.01
+  epochs = 20
+  theta = as.matrix(runif(dim(data)[2], 0, 1))
+  loss_old = Inf
+  product = data %*% theta
+  loss_new = sum(1 + exp(-(labels * product)))
+  
+  for(epoch in 1:epochs) {
+    temp_binded_df = cbind(data, labels)
+    
+    shuffled_data_labels = bind_and_shuffle(data, labels)
+    data = shuffled_data_labels[, -786]
+    labels = as.matrix(shuffled_data_labels[, 786])
+
+    #Iterate over each sample in the dataset
+    for (i in 1:dim(data)[1])
+    {
+      x_i = t(as.matrix(data[i,]))
+      y_i = t(as.matrix(labels[i,]))
+      product = x_i %*% theta
+      delta = t(x_i) %*% y_i / as.numeric(1 + exp(y_i * product))
+      theta = theta + alpha * delta
+    }
+    
+    loss_old = loss_new
+    product = data %*% theta
+    loss_new = sum(1 + exp(-(labels * product)))
+    if (abs(loss_new - loss_old) <= threshold) {
+      return (theta)
+    }
   }
+  return (theta)
 }
 
 
-theta = train(train_data_0_1, train_labels_0_1, 0.2)
+##### Run train() on training sets #####
+theta_01 = train(train_data_0_1, train_labels_0_1, 0.2)
+prediction_01 = predict(theta_01, train_data_0_1)
+acc_01 = accuracy(prediction_01, train_labels_0_1)
+correct_01 = which(train_labels_0_1 == prediction_01)
+incorrect_01 = which(train_labels_0_1 != prediction_01)
+
+theta_35 = train(train_data_3_5, train_labels_3_5, 0.6)
+prediction_35 = predict(theta_35, train_data_3_5)
+acc_35 = accuracy(prediction_35, train_labels_3_5)
+correct_35 = which(train_labels_3_5 == prediction_35)
+incorrect_35 = which(train_labels_3_5 != prediction_35)
+
+
+print(sprintf("Accuracy of the training set 0/1 and 3/5 is %f and %f respectively. Therefore no incorrect images were found for training set data for 0/1", acc_01, acc_35))
+
+image(rotate(matrix(data=t(train_data_0_1)[2:785, correct_01[1]], nrow=28, ncol=28)), col=gray(0:255/255),
+      main="Predicted: 0, Expected: 0 From train_data_0_1")
+
+image(rotate(matrix(data=t(train_data_0_1)[2:785, correct_01[5924]], nrow=28, ncol=28)), col=gray(0:255/255),
+      main="Predicted: 1, Expected: 1 From train_data_0_1")
+
+image(rotate(matrix(data=t(train_data_3_5)[2:785, correct_35[1]], nrow=28, ncol=28)), col=gray(0:255/255),
+      main="Predicted: 3, Expected: 3 From train_data_3_5")
+
+image(rotate(matrix(data=t(train_data_3_5)[2:785, incorrect_35[386]], nrow=28, ncol=28)), col=gray(0:255/255),
+      main="Predicted: 3, Expected: 5 From train_data_3_5")
+
+image(rotate(matrix(data=t(train_data_3_5)[2:785, correct_35[6233]], nrow=28, ncol=28)), col=gray(0:255/255),
+      main="Predicted: 5, Expected: 5 From train_data_3_5")
+
+image(rotate(matrix(data=t(train_data_3_5)[2:785, incorrect_35[1]], nrow=28, ncol=28)), col=gray(0:255/255),
+      main="Predicted: 5, Expected: 3 From train_data_3_5")
+
+```
+
+## 2. Modelling [35 points]
+```{r}
+accuracy = function(predicted_labels, true_labels) {
+  acc = sum(predicted_labels == true_labels) / dim(true_labels)[1]
+  return (acc)
+}
+
+model = function(train_data, train_labels, test_data, test_labels, alpha) {
+  theta = train(train_data, train_labels, alpha)
+  prediction_train = predict(theta, train_data)
+  acc_train = accuracy(prediction_train, train_labels)
+  
+  prediction_test = predict(theta, test_data)
+  acc_test = accuracy(prediction_test, test_labels)
+  return (list(theta, acc_train, acc_test))
+}
+
 
 ```
 
