@@ -64,9 +64,9 @@ train = function(data, labels, alpha){
   loss_new = sum(1 + exp(-(labels * product)))
   
   for(epoch in 1:epochs) {
-    temp_binded_df <- cbind(data, labels)
+    temp_binded_df = cbind(data, labels)
     
-    shuffled_data_labels <- bind_and_shuffle(data, labels)
+    shuffled_data_labels = bind_and_shuffle(data, labels)
     data = shuffled_data_labels[, -786]
     labels = as.matrix(shuffled_data_labels[, 786])
     theta_previous = theta
@@ -94,10 +94,20 @@ train = function(data, labels, alpha){
 
 
 theta = train(train_data_0_1, train_labels_0_1, 0.2)
-prediction <- predict(theta, train_data_0_1)
-acc <- accuracy(prediction, train_labels_0_1)
+prediction = predict(theta, train_data_0_1)
+acc = accuracy(prediction, train_labels_0_1)
 
-theta <- train(train_data_0_1, train_labels_0_1, 0.2)
-prediction <- predict(theta, test_data_0_1)
-acc <- accuracy(prediction, test_labels_0_1)
+theta = train(train_data_0_1, train_labels_0_1, 0.2)
+prediction = predict(theta, test_data_0_1)
+acc = accuracy(prediction, test_labels_0_1)
 sprintf("Accuracy of prediction in test_data_0_1 is %f", acc)
+
+theta = train(train_data_3_5, train_labels_3_5, 0.8)
+prediction = predict(theta, train_data_3_5)
+acc = accuracy(prediction, train_data_3_5)
+sprintf("Accuracy of prediction in test_data_3_5 is %f", acc)
+
+theta = train(train_data_3_5, train_labels_3_5, 0.8)
+prediction = predict(theta, test_data_3_5)
+acc = accuracy(prediction, test_labels_3_5)
+sprintf("Accuracy of prediction in test_data_3_5 is %f", acc)
