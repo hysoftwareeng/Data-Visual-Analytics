@@ -40,15 +40,6 @@ predict = function(theta, data) {
   return (result)
 }
 
-####################################
-#####Calculate the accuracy
-####################################
-accuracy = function(labels_pred, labels){
-  error = labels - labels_pred
-  acc = length(error[error==0])/length(labels)
-  return(acc)
-}
-
 bind_and_shuffle = function(data, labels) {
   bound_data_labels = cbind(data, labels)
   bound_data_labels_shuffled = bound_data_labels[sample(nrow(bound_data_labels)), ]
@@ -92,12 +83,24 @@ train = function(data, labels, alpha){
 }
 
 
+### modelling ######
 
-theta = train(train_data_0_1, train_labels_0_1, 0.2)
+accuracy = function(predicted_labels, true_labels) {
+  acc = sum(predicted_labels == true_labels) / dim(true_labels)[1]
+  return (acc)
+}
+
+model(train_data, train_labels, test_data, test_labels, alpha) {
+  
+}
+
+
+theta = train(train_data_0_1, train_labels_0_1, 0.8)
 prediction = predict(theta, train_data_0_1)
 acc = accuracy(prediction, train_labels_0_1)
+sprintf("Accuracy of prediction in train_data_0_1 is %f", acc)
 
-theta = train(train_data_0_1, train_labels_0_1, 0.2)
+theta = train(train_data_0_1, train_labels_0_1, 0.8)
 prediction = predict(theta, test_data_0_1)
 acc = accuracy(prediction, test_labels_0_1)
 sprintf("Accuracy of prediction in test_data_0_1 is %f", acc)
@@ -105,7 +108,7 @@ sprintf("Accuracy of prediction in test_data_0_1 is %f", acc)
 theta = train(train_data_3_5, train_labels_3_5, 0.8)
 prediction = predict(theta, train_data_3_5)
 acc = accuracy(prediction, train_data_3_5)
-sprintf("Accuracy of prediction in test_data_3_5 is %f", acc)
+sprintf("Accuracy of prediction in train_data_3_5 is %f", acc)
 
 theta = train(train_data_3_5, train_labels_3_5, 0.8)
 prediction = predict(theta, test_data_3_5)
