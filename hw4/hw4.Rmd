@@ -1,6 +1,6 @@
 ---
-title: "Homework 3: Regression Theory"
-subtitle: "CSE6242 - Data and Visual Analytics - Summer 2018\n\nDue: Sunday, July 8, 2018 at 11:59 PM UTC-12:00 on T-Square\n\n hyang390, 903320189"
+title: "Homework 4: Regression Practice"
+subtitle: "CSE6242 - Data and Visual Analytics - Summer 2018\n\nDue: Sunday, July 22, 2018 at 11:59 PM UTC-12:00 on T-Square\n\n hyang390, 903320189"
 output: 
   html_notebook: default
   pdf_document: default
@@ -11,6 +11,8 @@ output:
 
 ```{r}
 #setwd("C:/Users/Batmachine/Dropbox/OMSCS/CSE6242 - DVA/Assignments/hw4")
+library("ggplot2")
+library("reshape2")
 mnist_train = read.csv('mnist/mnist_train.csv', header=FALSE)
 mnist_test = read.csv('mnist/mnist_test.csv', header=FALSE)
 
@@ -156,6 +158,48 @@ model = function(train_data, train_labels, test_data, test_labels, alpha) {
   return (list(theta, acc_train, acc_test))
 }
 
+learning_rates = seq(0.1, 1.0, by = 0.1)
+experiment_01 = data.frame(matrix(nrow=10, ncol = 3))
+results_01 = list()
+results_35 = list()
+
+for (i in 1:length(learning_rates)) {
+  exp_01 = model(train_data_0_1, train_labels_0_1, test_data_0_1, test_labels_0_1, rate)
+  results_01[[i]] = c('dataset_0_1', learning_rates[i], exp_01[[2]], exp_01[[3]])
+  exp_35 = model(train_data_3_5, train_labels_3_5, test_data_3_5, test_labels_3_5, rate)
+  results_35[[i]] = c('dataset_3_5', learning_rates[i], exp_35[[2]], exp_35[[3]])
+}
+
+total_results = append(results_01, results_35)
+results_01 = as.data.frame(do.call(rbind, results_01))
+results_35 = as.data.frame(do.call(rbind, results_35))
+results_df = as.data.frame(do.call(rbind, total_results))
+colnames(results_df) = c('dataset', 'learning_rate', 'acc_train', 'acc_test')
+colnames(results_01) = c('dataset', 'learning_rate', 'acc_train', 'acc_test')
+colnames(results_35) = c('dataset', 'learning_rate', 'acc_train', 'acc_test')
+
+ggplot(data=results_df, aes(x=learning_rate, y=acc_train, group=dataset, color=dataset)) + 
+  geom_line() +
+  ggtitle("Learning Rate vs Training Set Accuracy") +
+  xlab("Learning Rate") + 
+  ylab("Training Set Accuracy")
+
+ggplot(data=results_df, aes(x=learning_rate, y=acc_test, group=dataset, color=dataset)) + 
+  geom_line() +
+  ggtitle("Learning Rate vs Testing Set Accuracy") +
+  xlab("Learning Rate") + 
+  ylab("Testing Set Accuracy")
+
+max_train_01 = which.max(results_01$acc_train)
+max_test_01 = which.max(results_01$acc_test)
+rate_test_01 = results_01$learning_rate[results_01$acc_test == max_test_01]
+
+max_train_35 = which.max(results_35$acc_train)
+max_test_35 = which.max(results_35$acc_test)
+rate_test_35 = results_35$learning_rate[results_35$acc_test == max_test_35]
+
+sprintf("Maximum training accuracy for 0_1 dataset is %f", max(accuracies_df$accuracy[accuracies_df$mode == 'train_accuracy_0_1']))
 
 ```
 
+This assignment deals with binary classification only. However, for a multiclass classification, we could actually decouple the problem into n distinct binary classification problems. For example, if we are given a dataset with 0/1/3/5 all together. We could decouple this into the binary classification problems 0 vs 1/3/5, 1 vs 0/3/5, 3 vs 0/1/5, etc. This allows us to apply the same concepts of stochastic gradient descent to these binary classification problems. We will be predicting one variable against all the others bunched together. For example, if we are predicting 0 vs 1/3/5, if the probability of 0 is higher, than we know the prediction is 0. However, is 1/3/5 is higher, we can then predict from 1/3/5 with 1 vs 3/5, 3 vs 1/5, etc. 
