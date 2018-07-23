@@ -2,8 +2,8 @@
 title: "Homework 4: Regression Practice"
 subtitle: "CSE6242 - Data and Visual Analytics - Summer 2018\n\nDue: Sunday, July 22, 2018 at 11:59 PM UTC-12:00 on T-Square\n\n hyang390, 903320189"
 output: 
-  html_notebook: default
   pdf_document: default
+  html_notebook: default
 ---
 
 
@@ -220,8 +220,8 @@ for (i in 1:length(data_percentage)) {
   data_01 = sample_01[, -786]
   labels_01 = as.matrix(sample_01[, 786])
   
-  data_35 = sample_01[, -786]
-  labels_35 = as.matrix(sample_01[, 786])
+  data_35 = sample_35[, -786]
+  labels_35 = as.matrix(sample_35[, 786])
   
   acc_train_01 = vector(mode="numeric")
   acc_test_01 = vector(mode="numeric")
@@ -274,7 +274,7 @@ ggplot(data=curves_df, aes(x=data_percentage, y=acc_test, group=dataset, color=d
 
 ```
 
-
+From the learning curves, there is a general pattern that as we increase the training set size, the accuracy for the testing set increases. This makes sense as when we have more traning samples, our model is more well trained and hence will do better on the testing sets. 
 
 
 
