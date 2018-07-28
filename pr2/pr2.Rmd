@@ -109,7 +109,7 @@ for (i in seq(1:nrow(df_mismatches))) {
 }
 
 df2 = subset(df_mismatches, removal == 0)
-df2 = subset(df2, select=-c(removal))
+df2 = subset(df2, select=-c(removal, Released_Year))
 dim(df2)
 
 
@@ -201,7 +201,6 @@ set.seed(100)
 loop_seeds = seq(11, 110, 10)
 
 df_numeric = select_if(df2, is.numeric)
-#df_numeric = na.omit(df_numeric)
 
 rmse_training = function(model){
   residual = residuals(model)
@@ -212,7 +211,7 @@ rmse_training = function(model){
 rmse_testing = function(model, df_testing){
   prediction = predict(model, df_testing)
   actual = df_testing$Gross
-  residual = actual-prediction
+  residual = prediction-actual
   RMSE = sqrt(mean(residual[!is.na(residual)]^2))
   return (RMSE)
 }
@@ -220,7 +219,7 @@ rmse_testing = function(model, df_testing){
 rmse_calculation = function(df_training, df_testing, percent, seed) {
   vec_training = vector(mode="numeric", length = 10)
   vec_testing = vector(mode="numeric", length = 10)
-  for (i in 1:10) {
+  for (i in 1:length(loop_seeds)) {
     set.seed(loop_seeds[i])
     df_training = df_training[1:(percent*nrow(df_training)), ]
     model = lm(Gross~., df_training)
@@ -251,21 +250,24 @@ colnames(df_result) = c("percentage", "training_RMSE", "testing_RMSE")
 ```
 
 ```{r}
-ggplot(df_result, aes(percentage)) + geom_line(aes(y=training_RMSE,color="train"))+
-geom_line(aes(y=testing_RMSE,color="test"))+
-labs(title = "Ratio of Training Set vs RMSE for Numeric Values without Transformation", x= "Ratio of Training size", y = "RMSE")
+ggplot(df_result, aes(percentage)) + geom_line(aes(y=training_RMSE,color="Training Set"))+
+geom_line(aes(y=testing_RMSE,color="Testing Set"))+
+labs(title = "Percentage of Training Set vs RMSE for Numeric Values", x= "Percentage of Training size", y = "RMSE")
+
+min_training_rmse = min(df_result$training_RMSE)
+min_testing_rmse = min(df_result$testing_RMSE)
 
 ```
 
 
 **Q**: List the numeric variables you used.
 
-**A**: 
+**A**: I used the package "dplyr" to select the numeric columns from df2 after preprocessing. The numeric variables used are: Year, Runtime, Metascore, imdbRating, imdbVotes, tomatoMeter, tomatoRating, tomatoReviews, tomatoFresh, tomatoRotten, tomatoUserMeter, tomatoUserRating, tomatoUserReviews, Budget, Gross, Date
 
 
 **Q**: What is the best mean test RMSE value you observed, and at what training set size?
 
-**A**: 
+**A**: The best mean test RMSE observed is 83980311, and this occured at training set size 100%. (Note that this 100% is for the 80% extracted from the original preprocessed dataset) The best mean training RMSE observed is 11769783, occuring at training set size 10%. 
 
 
 ## 2. Feature transformations
