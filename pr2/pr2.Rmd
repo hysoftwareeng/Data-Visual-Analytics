@@ -154,6 +154,8 @@ Perform any additional preprocessing steps that you find necessary, such as deal
 
 ```{r}
 # TODO(optional): Additional preprocessing
+df2$Metascore = as.numeric(as.character(df2$Metascore))
+df2 = na.omit(df2)
 dim(df2)
 ```
 
@@ -194,6 +196,14 @@ Use Linear Regression to predict `Gross` based on available _numeric_ variables.
 
 ```{r}
 # TODO: Build & evaluate model 1 (numeric variables only)
+set.seed(100)
+
+#sample 20% of the data for testing, 80% for training
+df2_randomized = df2[sample(nrow(df2)), ]
+df_testing = df2_randomized[1:(0.2*nrow(df2_randomized)), ]
+df_training = df2_randomized[(nrow(df_testing)+1):nrow(df2_randomized), ]
+
+
 ```
 
 **Q**: List the numeric variables you used.
