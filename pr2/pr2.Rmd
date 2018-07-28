@@ -195,7 +195,7 @@ Each of the following tasks is worth 20 points, for a total of 100 points for th
 
 Use Linear Regression to predict `Gross` based on available _numeric_ variables. You can choose to include all or a subset of them.
 
-```{r}
+```{r, warning=FALSE}
 # TODO: Build & evaluate model 1 (numeric variables only)
 set.seed(100)
 loop_seeds = seq(11, 110, 10)
@@ -213,7 +213,7 @@ rmse_testing = function(model, df_testing){
   prediction = predict(model, df_testing)
   actual = df_testing$Gross
   residual = actual-prediction
-  RMSE = sqrt(mean(residual^2))
+  RMSE = sqrt(mean(residual[!is.na(residual)]^2))
   return (RMSE)
 }
 
@@ -246,7 +246,17 @@ for (i in 1:length(percentages)) {
   vec_mean_testing[i] = model_result[2]
 }
 
+df_result = data.frame(percentages*100, vec_mean_training, vec_mean_testing)
+colnames(df_result) = c("percentage", "training_RMSE", "testing_RMSE")
 ```
+
+```{r}
+ggplot(df_result, aes(percentage)) + geom_line(aes(y=training_RMSE,color="train"))+
+geom_line(aes(y=testing_RMSE,color="test"))+
+labs(title = "Ratio of Training Set vs RMSE for Numeric Values without Transformation", x= "Ratio of Training size", y = "RMSE")
+
+```
+
 
 **Q**: List the numeric variables you used.
 
