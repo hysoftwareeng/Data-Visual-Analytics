@@ -93,19 +93,24 @@ _Note: You may compare the `Released` column (string representation of release d
 
 ```{r}
 # TODO: Remove mismatched rows
-df2$Released_Year = as.numeric(format(as.Date(df2$Released, format = "%Y-%m-%d"), "%Y"))
-df2$removal = 1
-for (i in seq(1:nrow(df2))) {
-  if (is.na(df2$Year[i]) & is.na(df2$Released_Year[i])) {
-    df2$removal[i] = 0
+df_mismatches = df2
+df_mismatches$Released_Year = as.numeric(format(as.Date(df_mismatches$Released, format = "%Y-%m-%d"), "%Y"))
+df_mismatches$removal = 1
+for (i in seq(1:nrow(df_mismatches))) {
+  if (is.na(df_mismatches$Date[i]) & is.na(df_mismatches$Released_Year[i])) {
+    df_mismatches$removal[i] = 0
   }
-  else if (!is.na(df2$Year[i]) & !is.na(df2$Released_Year[i]) & df2$Year[i] == df2$Released_Year[i]) {
-    df2$removal[i] = 0
+  if (!is.na(df_mismatches$Date[i]) & !is.na(df_mismatches$Released_Year[i])) {
+    if ((df_mismatches$Date[i] == df_mismatches$Released_Year[i]) | (abs(df_mismatches$Date[i] - df_mismatches$Released_Year[i]) == 1)) {
+      df_mismatches$removal[i] = 0
+    }
   }
 }
 
-df2 = subset(df2, removal == 0)
+df2 = subset(df_mismatches, removal == 0)
 dim(df2)
+
+
 ```
 
 ## 5. Drop `Domestic_Gross` column
@@ -114,18 +119,42 @@ dim(df2)
 
 ```{r}
 # TODO: Exclude the `Domestic_Gross` column
+df2 <- subset(df2, select=-c(Domestic_Gross))
+dim(df2)
 ```
 
 ## 6. Process `Runtime` column
 
 ```{r}
 # TODO: Replace df$Runtime with a numeric column containing the runtime in minutes
+convertRuntime = function(timestr) {
+  split_strtime = strsplit(timestr, "\\s+")[[1]]
+  if (length(split_strtime) == 2) {
+    if (split_strtime[2] == "min") {
+      time = as.numeric(split_strtime[1])
+    }
+    else if (split_strtime[2] == "h") {
+      time = as.numeric(split_strtime[1])*60
+    }
+  }
+  else if (length(split_strtime) == 4) {
+    time = as.numeric(split_strtime[1])*60 + as.numeric(split_strtime[3])
+  }
+  else {
+    time = suppressWarnings(as.numeric(split_strtime[1]))
+  }
+  return (time)
+}
+
+df2$Runtime = sapply(df2$Runtime, convertRuntime)
+dim(df2)
 ```
 
 Perform any additional preprocessing steps that you find necessary, such as dealing with missing values or highly correlated columns (feel free to add more code chunks, markdown blocks and plots here as necessary).
 
 ```{r}
 # TODO(optional): Additional preprocessing
+dim(df2)
 ```
 
 _**Note**: Do NOT convert categorical variables (like `Genre`) into binary columns yet. You will do that later as part of a model improvement task._
@@ -136,6 +165,9 @@ Report the dimensions of the preprocessed dataset you will be using for modeling
 
 ```{r}
 # TODO: Print the dimensions of the final preprocessed dataset and column names
+cat("The final preprocessed dataset has", dim(df2)[1], "rows,", dim(df2)[2], "columns", end="\n", file="")
+cat("The column names in the final preprocessed dataset are:", end="\n", file="")
+colnames(df)
 ```
 
 # Evaluation Strategy
