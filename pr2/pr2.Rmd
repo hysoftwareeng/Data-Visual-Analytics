@@ -49,6 +49,7 @@ Load any R packages that you will need to use. You can come back to this chunk, 
 
 ```{r}
 library(ggplot2)
+library(dplyr)
 ```
 
 If you are using any non-standard packages (ones that have not been discussed in class or explicitly allowed for this project), please mention them below. Include any special instructions if they cannot be installed using the regular `install.packages('<pkg name>')` command.
@@ -108,6 +109,7 @@ for (i in seq(1:nrow(df_mismatches))) {
 }
 
 df2 = subset(df_mismatches, removal == 0)
+df2 = subset(df2, select=-c(removal))
 dim(df2)
 
 
@@ -119,7 +121,7 @@ dim(df2)
 
 ```{r}
 # TODO: Exclude the `Domestic_Gross` column
-df2 <- subset(df2, select=-c(Domestic_Gross))
+df2 = subset(df2, select=-c(Domestic_Gross))
 dim(df2)
 ```
 
@@ -155,7 +157,6 @@ Perform any additional preprocessing steps that you find necessary, such as deal
 ```{r}
 # TODO(optional): Additional preprocessing
 df2$Metascore = as.numeric(as.character(df2$Metascore))
-df2 = na.omit(df2)
 dim(df2)
 ```
 
@@ -169,7 +170,7 @@ Report the dimensions of the preprocessed dataset you will be using for modeling
 # TODO: Print the dimensions of the final preprocessed dataset and column names
 cat("The final preprocessed dataset has", dim(df2)[1], "rows,", dim(df2)[2], "columns", end="\n", file="")
 cat("The column names in the final preprocessed dataset are:", end="\n", file="")
-colnames(df)
+colnames(df2)
 ```
 
 # Evaluation Strategy
@@ -197,12 +198,53 @@ Use Linear Regression to predict `Gross` based on available _numeric_ variables.
 ```{r}
 # TODO: Build & evaluate model 1 (numeric variables only)
 set.seed(100)
+loop_seeds = seq(11, 110, 10)
+
+df_numeric = select_if(df2, is.numeric)
+#df_numeric = na.omit(df_numeric)
+
+rmse_training = function(model){
+  residual = residuals(model)
+  RMSE=sqrt(mean(residual^2))
+  return (RMSE)
+}
+
+rmse_testing = function(model, df_testing){
+  prediction = predict(model, df_testing)
+  actual = df_testing$Gross
+  residual = actual-prediction
+  RMSE = sqrt(mean(residual^2))
+  return (RMSE)
+}
+
+rmse_calculation = function(df_training, df_testing, percent, seed) {
+  vec_training = vector(mode="numeric", length = 10)
+  vec_testing = vector(mode="numeric", length = 10)
+  for (i in 1:10) {
+    set.seed(loop_seeds[i])
+    df_training = df_training[1:(percent*nrow(df_training)), ]
+    model = lm(Gross~., df_training)
+    vec_training[i] = rmse_training(model)
+    vec_testing[i] = rmse_testing(model, df_testing)
+  }
+  mean_training = mean(vec_training)
+  mean_testing = mean(vec_testing)
+  return (c(mean_training, mean_testing))
+}
 
 #sample 20% of the data for testing, 80% for training
-df2_randomized = df2[sample(nrow(df2)), ]
-df_testing = df2_randomized[1:(0.2*nrow(df2_randomized)), ]
-df_training = df2_randomized[(nrow(df_testing)+1):nrow(df2_randomized), ]
+df_randomized = df_numeric[sample(nrow(df_numeric)), ]
+df_testing = df_randomized[1:(0.2*nrow(df_randomized)), ]
+df_training = df_randomized[(nrow(df_testing)+1):nrow(df_randomized), ]
 
+percentages = seq(0.1, 1, by=0.1)
+vec_mean_training = vector(mode="numeric", length = 10)
+vec_mean_testing = vector(mode="numeric", length = 10)
+for (i in 1:length(percentages)) {
+  model_result = rmse_calculation(df_training, df_testing, percentages[i])
+  vec_mean_training[i] = model_result[1]
+  vec_mean_testing[i] = model_result[2]
+}
 
 ```
 
