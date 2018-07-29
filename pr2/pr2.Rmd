@@ -330,6 +330,49 @@ Write code that converts genre, actors, directors, and other categorical variabl
 
 df_cat = subset(df2, select=c(Rated, Genre, Director, Writer, Actors, Language, Country, Awards, Production, Gross))
 
+###### Process Genre #############
+
+
+
+###### Process Awards #############
+
+df_cat$Awards_mod = tolower(df_cat$Awards)
+df_cat$Awards_Split = strsplit(df_cat$Awards_mod, "\\,|\\ |\\.|\\&")
+
+different_win_nominations=vector()
+for (i in seq(1:nrow(df_cat))) {
+  awards_vector = unlist(df_cat$Awards_Split[i])
+  wins= 0
+  noms = 0
+  if ("win" %in% awards_vector) {
+    index = which(awards_vector == "win")
+    wins= wins + as.integer(awards_vector[index-1])
+  }
+  if ("wins" %in% awards_vector) {
+    index = which(awards_vector == "wins")
+    wins= wins + as.integer(awards_vector[index-1])
+  }
+  if ("won" %in% awards_vector) {
+    index = which(awards_vector == "won")
+    wins= wins + as.integer(awards_vector[index+1])
+  }
+  if ("nominated" %in% awards_vector) {
+    index = which(awards_vector == "nominated")
+    noms= noms + as.integer(awards_vector[index+2])
+  }
+  if ("nomination" %in% awards_vector) {
+    index = which(awards_vector == "nomination")
+    noms= noms + as.integer(awards_vector[index-1])
+  }
+  if ("nominations" %in% awards_vector) {
+    index = which(awards_vector == "nominations")
+    noms= noms + as.integer(awards_vector[index-1])
+  }
+  df_cat$Awards_Won[i] = wins
+  df_cat$Awards_Nom[i] = noms
+}
+subset(df_cat, select=-c(Awards))
+
 ```
 
 
