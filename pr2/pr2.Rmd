@@ -328,7 +328,8 @@ Write code that converts genre, actors, directors, and other categorical variabl
 ```{r}
 # TODO: Build & evaluate model 3 (converted non-numeric variables only)
 
-df_cat = subset(df2, select=-colnames(df_numeric))
+df_cat = subset(df2, select=c(Rated, Genre, Director, Writer, Actors, Language, Country, Awards, Production, Gross))
+
 ```
 
 
