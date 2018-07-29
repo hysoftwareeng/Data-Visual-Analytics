@@ -199,16 +199,16 @@ Use Linear Regression to predict `Gross` based on available _numeric_ variables.
 # TODO: Build & evaluate model 1 (numeric variables only)
 rmse_training = function(model){
   residual = residuals(model)
-  RMSE=sqrt(mean(residual^2))
-  return (RMSE)
+  rmse=sqrt(mean(residual^2))
+  return (rmse)
 }
 
 rmse_testing = function(model, df_testing){
   prediction = predict(model, df_testing)
   actual = df_testing$Gross
   residual = prediction-actual
-  RMSE = sqrt(mean(residual[!is.na(residual)]^2))
-  return (RMSE)
+  rmse = sqrt(mean(residual[!is.na(residual)]^2))
+  return (rmse)
 }
 
 rmse_calculation = function(df_training, df_testing, percent, seed) {
