@@ -1,6 +1,6 @@
 ---
 title: 'Project 2: Modeling and Evaluation'
-subtitle: "CSE6242 - Data and Visual Analytics - Summer 2018\n\nDue: Sunday, July 24, 2018 at 11:59 PM UTC-12:00 on T-Square"
+subtitle: "CSE6242 - Data and Visual Analytics - Summer 2018\n\nDue: Sunday, July 29, 2018 at 11:59 PM UTC-12:00 on T-Square\n\n hyang390, 903320189"
 output:
   pdf_document: default
   html_document:
@@ -64,7 +64,7 @@ Before we start building models, we should clean up the dataset and perform any 
 
 ```{r}
 # TODO: Remove all rows from df that do not correspond to movies
-df2 <- df[df$Type == "movie",]
+df2 = df[df$Type == "movie",]
 dim(df2)
 ```
 
@@ -74,7 +74,7 @@ Since our goal is to model `Gross` revenue against other variables, rows that ha
 
 ```{r}
 # TODO: Remove rows with missing Gross value
-df2 <- df2[!is.na(df2$Gross), ]
+df2 = df2[!is.na(df2$Gross), ]
 dim(df2)
 ```
 
@@ -84,7 +84,7 @@ Inflation and other global financial factors may affect the revenue earned by mo
 
 ```{r}
 # TODO: Exclude movies released prior to 2000
-df2 <- df2[df2$Year >= 2000, ]
+df2 = df2[df2$Year >= 2000, ]
 dim(df2)
 ```
 
@@ -154,7 +154,7 @@ dim(df2)
 
 Perform any additional preprocessing steps that you find necessary, such as dealing with missing values or highly correlated columns (feel free to add more code chunks, markdown blocks and plots here as necessary).
 
-```{r}
+```{r, warning=FALSE}
 # TODO(optional): Additional preprocessing
 df2$Metascore = as.numeric(as.character(df2$Metascore))
 dim(df2)
@@ -271,7 +271,7 @@ q1_rmse = min_rmse(df_result1)
 
 **Q**: List the numeric variables you used.
 
-**A**: I used the package "dplyr" to select the numeric columns from df2 after preprocessing. The numeric variables used are: Year, Runtime, Metascore, imdbRating, imdbVotes, tomatoMeter, tomatoRating, tomatoReviews, tomatoFresh, tomatoRotten, tomatoUserMeter, tomatoUserRating, tomatoUserReviews, Budget, Gross, Date
+**A**: I used the package "dplyr" to select the numeric columns from df2 after preprocessing. The numeric variables used are: Year, Runtime, Metascore, imdbRating, imdbVotes, tomatoMeter, tomatoRating, tomatoReviews, tomatoFresh, tomatoRotten, tomatoUserMeter, tomatoUserRating, tomatoUserReviews, Budget, Date.
 
 
 **Q**: What is the best mean test RMSE value you observed, and at what training set size?
@@ -310,7 +310,7 @@ q2_rmse = min_rmse(df_result2)
 
 **Q**: Explain which transformations you used and why you chose them.
 
-**A**: I applied both numeric and non-numeric transformations. For numeric transformations, I performed power transformations to fields imdbVotes, imdbRating, tomatoRating, tomatoReviews, tomatoUserRating, tomatoMeter and Budget. Out of all the numeric fields, various trial and error with different power values revealed the relationships between these numeric fields and "Gross" could be somewhat linear with various degrees of power transformations. I did not find a suitable case to apply the log transformation to any of the numeric fields as the resultant didn't seem to provide a better relationship for analysis.
+**A**: I applied both numeric and non-numeric transformations. For numeric transformations, I performed power transformations to fields imdbVotes, imdbRating, tomatoRating, tomatoReviews, tomatoUserRating, tomatoMeter and Budget. Out of all the numeric fields, various trial and error with different power values revealed the relationships between these numeric fields and "Gross" could be somewhat linear with various degrees of power transformations. I did not find a suitable case to apply the log transformation to any of the numeric fields as the results do not seem to provide a better relationship for analysis.
 
 As for non-numeric transformations, I binned both "Runtime" and "Budget". These fields have a large range of values, and binning them will make the relationship with "Gross" easier to analyze. 
 
@@ -325,7 +325,7 @@ Compared to Task 1, both RMSEs are now less with the feature transformations, th
 
 Write code that converts genre, actors, directors, and other categorical variables to columns that can be used for regression (e.g. binary columns as you did in Project 1). Also process variables such as awards into more useful columns (again, like you did in Project 1). Now use these converted columns only to build your next model.
 
-```{r}
+```{r, warning=FALSE}
 # TODO: Build & evaluate model 3 (converted non-numeric variables only)
 
 df_cat = subset(df2, select=c(Rated, Genre, Director, Writer, Actors, Country, Awards, Production, Language, Gross))
@@ -426,15 +426,15 @@ df_cat = subset(df_cat, select=-c(Writers_mod))
 
 
 ###### Process Actors #############
-actors = unlist(strsplit(df_cat$Actor, ','))
+actors = unlist(strsplit(df_cat$Actors, ','))
 actors = tolower(gsub(' ', '', actors))
 actors = names(sort(table(actors), decreasing = TRUE)[1:10])
 
 actors_df = data.frame(matrix(nrow = nrow(df_cat), ncol = length(actors)))
 colnames(actors_df) = actors
-df_cat$Actors_mod = tolower(gsub(' ', '', df_cat$Actor))
-if ("Actor" %in% colnames(df_cat)){
-  df_cat = subset(df_cat, select=-c(Actor))
+df_cat$Actors_mod = tolower(gsub(' ', '', df_cat$Actors))
+if ("Actors" %in% colnames(df_cat)){
+  df_cat = subset(df_cat, select=-c(Actors))
 }
 
 actors_df[,] = 0
@@ -549,57 +549,119 @@ for (item in languages) {
 
 df_cat = cbind(df_cat, languages_df)
 df_cat = subset(df_cat, select=-c(languages_mod)) 
-
+df_q3 = df_cat
+df_result3 = model_helper(df_q3)
 ```
 
 ```{r}
+ggplot(df_result3, aes(percentage)) + geom_line(aes(y=training_RMSE,color="Training Set"))+
+geom_line(aes(y=testing_RMSE,color="Testing Set"))+
+labs(title = "Percentage of Training Set vs RMSE for Categorical Variables", x= "Percentage of Training size", y = "RMSE")
 
+q3_rmse = min_rmse(df_result3)
 ```
 
 
 **Q**: Explain which categorical variables you used, and how you encoded them into features.
 
-**A**: For this task, I used the categorical variables: Rated, Genre, Director, Writer, Actors, Country, Awards and Production.
+**A**: For this task, I used the categorical variables: Rated, Genre, Director, Writer, Actors, Country, Language, Awards and Production.
 
 First, I created a new dataframe for just the categorical variables selected above. 
 
-For Rated, I first split the strings of Rated in the dataframe and preprocessed the values by replacing spaces and making everything lower case. Then I grouped them and only retrieved the values of the top 5 most popular ratings. I also created a new modified rated column in the dataframe for pattern matching. Then,for each of these 5 ratings, I assigned a value of 1 to a new column with the rating name in the category dataframe, 0 otherwise. The intermediate modified rating column and the original Rated column were both removed, and the newly created columns were merged back to the category dataframe. A similiar process was done for Genre (top 10), Director (top 10), Writer (top 10), Actors (top 10), Country (top 5), Language(top 5).
+For Rated, I first split the strings of Rated in the dataframe and preprocessed the values by replacing spaces and making everything lower case. Then I grouped them and only retrieved the values of the top 5 most popular ratings. I also created a new modified rated column in the dataframe for pattern matching. Then, for each of these 5 ratings, I assigned a value of 1 to a new column with the rating name in the category dataframe if the rows were matched, 0 otherwise. The intermediate modified rating column and the original Rated column were both removed, and the newly created columns were merged back to the category dataframe. A similiar process was done for Genre (top 10), Director (top 10), Writer (top 10), Actors (top 10), Country (top 5), Language(top 5), albeit selecting either top 5/top 10 as specified in the parentheses.
 
 
-For wards, I first split the string for Awards into into string vectors. Then, I iterated all the rows in the dataframe one by one, initializing the number of wins and nominations to 0. Then unlisted the vector into strings. Then, I looked for keywords in the unlisted strings. I know from looking at the Awards column that the number precedes keywords "win" and "wins", and succeeds "won". So I looked for these keywords then found the number index position accordingly. These are then accumulated to the current wins. A similiar technique was used for nominations with the keywords "nomination", "nominations" and "nominated". These values are then set to two new columns in the category dataframe for the current row. 
+For wards, I first split the string for Awards into into string vectors. Then, I iterated through all the rows in the dataframe one by one, initializing the number of wins and nominations to 0. Then unlisted the vector into strings. Then, I looked for keywords in the unlisted strings. I know from looking at the Awards column that the number precedes keywords "win" and "wins", and succeeds "won". So I looked for these keywords then found the number index position accordingly. These are then accumulated to the current wins. A similiar technique was used for nominations with the keywords "nomination", "nominations" and "nominated". These values are then set to two new columns in the category dataframe for the current row. 
 
 **Q**: What is the best mean test RMSE value you observed, and at what training set size? How does this compare with Task 2?
 
-**A**: 
+**A**: The best mean test RMSE value observed is 128590471, occuring at 100% of the training set. The best mean training RMSE observed is 11806496, again occuring at 10% of the training set. This is a big difference compared to Task 2, with an approximately 50% increase in RMSE for the testing set. 
 
 
 ## 4. Numeric and categorical variables
 
 Try to improve the prediction quality as much as possible by using both numeric and non-numeric variables from **Tasks 2 & 3**.
 
-```{r}
+```{r, warning=FALSE}
 # TODO: Build & evaluate model 4 (numeric & converted non-numeric variables)
+df_q2_mod = subset(df_q2, select=-c(Gross))
+df_q4 = cbind(df_q2_mod, df_q3)
+df_result4 = model_helper(df_q4)
+
 ```
+
+```{r}
+ggplot(df_result4, aes(percentage)) + geom_line(aes(y=training_RMSE,color="Training Set"))+
+geom_line(aes(y=testing_RMSE,color="Testing Set"))+
+labs(title = "Percentage of Training Set vs RMSE for Numerical & Categorical Variables", x= "Percentage of Training size", y = "RMSE")
+
+q4_rmse = min_rmse(df_result4)
+```
+
 
 **Q**: Compare the observed RMSE with Tasks 2 & 3.
 
-**A**: 
+**A**: For this task, the minimum RMSE observed for the testing set is 82271121, occuring at 100% of the training set. The minimum RMSE observed for the training set is 7556179, again at 10% of the training set. 
+
+Recall the RMSE of the testing set from Task 2 was 83844040, and task 3 was 128590471. Therefore the RMSE observed by combining both numeric and categorical variables yield a much lower RMSE than both of them separately. A similiar observation was observed for the training set as well. This makes sense as the model is able to be trained on more features and the model contains more information for the prediction of the testing set. 
 
 
 ## 5. Additional features
 
 Now try creating additional features such as interactions (e.g. `is_genre_comedy` x `is_budget_greater_than_3M`) or deeper analysis of complex variables (e.g. text analysis of full-text columns like `Plot`).
 
-```{r}
+```{r, warning=FALSE}
 # TODO: Build & evaluate model 5 (numeric, non-numeric and additional features)
+df_q5 = df_q4
+
+#Budget and genre Interaction
+df_q5$budget10m = ifelse(df_q5$Budget > (10000000),1,0)
+df_q5$buget10m_action = df_q5$budget10m * df_q5$action
+df_q5$buget10m_adventure = df_q5$budget10m * df_q5$adventure
+df_q5$buget10m_thriller = df_q5$budget10m * df_q5$thriller
+
+#Cross genre, actors interaction
+df_q5$family_comedy = df_q5$family * df_q5$comedy
+df_q5$animation_comedy = df_q5$animation * df_q5$comedy
+df_q5$thriller_horror = df_q5$thriller * df_q5$horror
+df_q5$adventure_action = df_q5$adventure * df_q5$action
+
+df_q5$action_damon = df_q5$action * df_q5$mattdamon
+df_q5$action_deniro = df_q5$action * df_q5$robertdeniro
+df_q5$action_willis = df_q5$action * df_q5$brucewillis
+df_q5$comedy_wilson = df_q5$comedy * df_q5$owenwilson
+df_q5$comedy_stiller = df_q5$comedy * df_q5$benstiller
+df_q5$family_clooney = df_q5$family * df_q5$georgeclooney
+df_q5$adventure_depp = df_q5$adventure * df_q5$johnnydepp
+
+#Cross votes/ratings
+df_q5$imdb_tomato = df_q5$imdbRating * df_q5$tomatoRating
+df_q5$imdb_rating_votes = df_q5$imdbRating * df_q5$imdbVotes
+
+df_result5 = model_helper(df_q5)
+
+```
+
+```{r}
+ggplot(df_result5, aes(percentage)) + geom_line(aes(y=training_RMSE,color="Training Set"))+
+geom_line(aes(y=testing_RMSE,color="Testing Set"))+
+labs(title = "Percentage of Training Set vs RMSE with Additional Features", x= "Percentage of Training size", y = "RMSE")
+
+q5_rmse = min_rmse(df_result5)
 ```
 
 **Q**: Explain what new features you designed and why you chose them.
 
-**A**: 
+**A**: I added three main categories of features. First, I chose to cross checking budget over 10 million dollars with a few large genres. I crossed this with genres action, adventure, and thriller as these genres usually tend to have larger budgets, hence the positive correlation. I thought these three new features might provide more information to the model.
+
+Second, I crossed some genres together to create interactions, such as comedy with family, thriller with horror, adventure with action. This is meaningful as these genres often go hand in hand and films often belong to these genres together instead of separately. I also crossed some genres with famous actors of that genre, such as Matt Damon, Robert De Niro, Bruce Willis with action films; Johnny Depp with adventure films, etc.
+
+Lastly, I crossed over the ratings of Rotten Tomatoes and IMDB, as we saw in the previous assignment there is a positive correlation between them, similiar for crossing IMDB ratings with votes. 
 
 
 **Q**: Comment on the final RMSE values you obtained, and what you learned through the course of this project.
 
-**A**:
+**A**: The final minimum RMSE obtained for the testing set is 81795265, occuring at 100% of the training set, and the minimum RMSE for the training set is 7199647, occuring at 10% of the training set again. It is meaningful to know that both of these RMSEs are the smallest out of all the tasks. Therefore this means the feature engineering that was done in this task to cross over some meainingful features was key in improving the RMSE. 
+
+Over the course of this project, I have learned a great deal about linear regression and various aspects of data processing and feature engineering. I learned how important it is to do data cleansing via pre-processing, as this can signifanctly make the analysis of data easier. I also learned the importance of separating categorical variables out to create new features, as well as analyzing numeric variables and how they can predict outcoms. Next, I learned that combining variables, including both numerical and categorical can yield more oppourtunities for the model to improve and thus reducing RMSE. Last but not least, it was eye-opening to learn how important feature engineering is, by creating new features by simply crossing over already existing ones, this could yield better accuracy and lower RMSE. 
 
