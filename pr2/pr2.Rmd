@@ -328,50 +328,169 @@ Write code that converts genre, actors, directors, and other categorical variabl
 ```{r}
 # TODO: Build & evaluate model 3 (converted non-numeric variables only)
 
-df_cat = subset(df2, select=c(Rated, Genre, Director, Writer, Actors, Language, Country, Awards, Production, Gross))
+df_cat = subset(df2, select=c(Genre, Director, Writer, Actors, Country, Awards, Production, Gross))
 
 ###### Process Genre #############
+genres = unlist(strsplit(df_cat$Genre, ','))
+genres = tolower(gsub(' ', '', genres))
+genres = unique(genres)
 
+genres_df = data.frame(matrix(nrow = nrow(df_cat), ncol = length(genres)))
+colnames(genres_df) = genres
+df_cat$Genres_mod = tolower(gsub(' ', '', df_cat$Genre))
+if ("Genre" %in% colnames(df_cat)){
+  df_cat = subset(df_cat, select=-c(Genre))
+}
+
+genres_df[,] = 0
+for (item in genres) {
+  genres_df[grep(item, df_cat[,"Genres_mod"]), item] = 1
+}
+colnames(genres_df)[colnames(genres_df) == "n/a"] = "notavailable"
+genres_df = subset(genres_df, select=-c(notavailable))
+df_cat = cbind(df_cat, genres_df)
+df_cat = subset(df_cat, select=-c(Genres_mod))
+
+###### Process Director #############
+directors = unlist(strsplit(df_cat$Director, ','))
+directors = tolower(gsub(' ', '', directors))
+directors = names(sort(table(directors), decreasing = TRUE)[1:10])
+
+directors_df = data.frame(matrix(nrow = nrow(df_cat), ncol = length(directors)))
+colnames(directors_df) = directors
+df_cat$Directors_mod = tolower(gsub(' ', '', df_cat$Director))
+if ("Director" %in% colnames(df_cat)){
+  df_cat = subset(df_cat, select=-c(Director))
+}
+
+directors_df[,] = 0
+for (item in directors) {
+  directors_df[grep(item, df_cat[,"Directors_mod"]), item] = 1
+}
+
+df_cat = cbind(df_cat, directors_df)
+df_cat = subset(df_cat, select=-c(Directors_mod))
+
+###### Process Writer #############
+writers = unlist(strsplit(df_cat$Writer, ','))
+writers = tolower(gsub(' ', '', writers))
+writers = gsub("\\(|\\)", "", writers)
+writers = gsub('screenplay', '', writers)
+writers = gsub('story', '', writers)
+writers = gsub('novel', '', writers)
+writers = names(sort(table(writers), decreasing = TRUE)[1:10])
+
+df_cat$Writers_mod = tolower(gsub(' ', '', df_cat$Writer))
+df_cat$Writers_mod = gsub("\\(|\\)", "", df_cat$Writers_mod)
+df_cat$Writers_mod = gsub('screenplay', '', df_cat$Writers_mod)
+df_cat$Writers_mod = gsub('story', '', df_cat$Writers_mod)
+df_cat$Writers_mod = gsub('novel', '', df_cat$Writers_mod)
+
+writers_df = data.frame(matrix(nrow = nrow(df_cat), ncol = length(writers)))
+colnames(writers_df) = writers
+if ("Writer" %in% colnames(df_cat)){
+  df_cat = subset(df_cat, select=-c(Writer))
+}
+
+writers_df[,] = 0
+for (item in writers) {
+  directors_df[grep(item, df_cat[,"Writers_mod"]), item] = 1
+}
+
+colnames(writers_df)[colnames(writers_df) == "n/a"] = "notavailable"
+writers_df = subset(writers_df, select=-c(notavailable))
+
+df_cat = cbind(df_cat, writers_df)
+df_cat = subset(df_cat, select=-c(Writers_mod))
+
+
+###### Process Actors #############
+actors = unlist(strsplit(df_cat$Actor, ','))
+actors = tolower(gsub(' ', '', actors))
+actors = names(sort(table(actors), decreasing = TRUE)[1:10])
+
+actors_df = data.frame(matrix(nrow = nrow(df_cat), ncol = length(actors)))
+colnames(actors_df) = actors
+df_cat$Actors_mod = tolower(gsub(' ', '', df_cat$Actor))
+if ("Actor" %in% colnames(df_cat)){
+  df_cat = subset(df_cat, select=-c(Actor))
+}
+
+actors_df[,] = 0
+for (item in actors) {
+  actors_df[grep(item, df_cat[,"Actors_mod"]), item] = 1
+}
+
+df_cat = cbind(df_cat, actors_df)
+df_cat = subset(df_cat, select=-c(Actors_mod))
+
+###### Process Country #############
+
+
+countries = unlist(strsplit(df_cat$Country, ','))
+countries = tolower(gsub(' ', '', countries))
+countries = names(sort(table(countries), decreasing = TRUE)[1:5])
+
+countries_df = data.frame(matrix(nrow = nrow(df_cat), ncol = length(countries)))
+colnames(countries_df) = countries
+df_cat$countries_mod = tolower(gsub(' ', '', df_cat$Country))
+if ("Country" %in% colnames(df_cat)){
+  df_cat = subset(df_cat, select=-c(Country))
+}
+
+countries_df[,] = 0
+for (item in countries) {
+  countries_df[grep(item, df_cat[,"countries_mod"]), item] = 1
+}
+
+df_cat = cbind(df_cat, countries_df)
+df_cat = subset(df_cat, select=-c(countries_mod)) 
+
+
+###### Process Production ##########
+productions = unlist(strsplit(df_cat$Production, ','))
+productions = tolower(gsub(' ', '', productions))
+productions = names(sort(table(productions), decreasing = TRUE)[1:6])
 
 
 ###### Process Awards #############
 
-df_cat$Awards_mod = tolower(df_cat$Awards)
-df_cat$Awards_Split = strsplit(df_cat$Awards_mod, "\\,|\\ |\\.|\\&")
-
-different_win_nominations=vector()
-for (i in seq(1:nrow(df_cat))) {
-  awards_vector = unlist(df_cat$Awards_Split[i])
-  wins= 0
-  noms = 0
-  if ("win" %in% awards_vector) {
-    index = which(awards_vector == "win")
-    wins= wins + as.integer(awards_vector[index-1])
-  }
-  if ("wins" %in% awards_vector) {
-    index = which(awards_vector == "wins")
-    wins= wins + as.integer(awards_vector[index-1])
-  }
-  if ("won" %in% awards_vector) {
-    index = which(awards_vector == "won")
-    wins= wins + as.integer(awards_vector[index+1])
-  }
-  if ("nominated" %in% awards_vector) {
-    index = which(awards_vector == "nominated")
-    noms= noms + as.integer(awards_vector[index+2])
-  }
-  if ("nomination" %in% awards_vector) {
-    index = which(awards_vector == "nomination")
-    noms= noms + as.integer(awards_vector[index-1])
-  }
-  if ("nominations" %in% awards_vector) {
-    index = which(awards_vector == "nominations")
-    noms= noms + as.integer(awards_vector[index-1])
-  }
-  df_cat$Awards_Won[i] = wins
-  df_cat$Awards_Nom[i] = noms
-}
-subset(df_cat, select=-c(Awards))
+# df_cat$Awards_mod = tolower(df_cat$Awards)
+# df_cat$Awards_Split = strsplit(df_cat$Awards_mod, "\\,|\\ |\\.|\\&")
+# 
+# different_win_nominations=vector()
+# for (i in seq(1:nrow(df_cat))) {
+#   awards_vector = unlist(df_cat$Awards_Split[i])
+#   wins= 0
+#   noms = 0
+#   if ("win" %in% awards_vector) {
+#     index = which(awards_vector == "win")
+#     wins= wins + as.integer(awards_vector[index-1])
+#   }
+#   if ("wins" %in% awards_vector) {
+#     index = which(awards_vector == "wins")
+#     wins= wins + as.integer(awards_vector[index-1])
+#   }
+#   if ("won" %in% awards_vector) {
+#     index = which(awards_vector == "won")
+#     wins= wins + as.integer(awards_vector[index+1])
+#   }
+#   if ("nominated" %in% awards_vector) {
+#     index = which(awards_vector == "nominated")
+#     noms= noms + as.integer(awards_vector[index+2])
+#   }
+#   if ("nomination" %in% awards_vector) {
+#     index = which(awards_vector == "nomination")
+#     noms= noms + as.integer(awards_vector[index-1])
+#   }
+#   if ("nominations" %in% awards_vector) {
+#     index = which(awards_vector == "nominations")
+#     noms= noms + as.integer(awards_vector[index-1])
+#   }
+#   df_cat$Awards_Won[i] = wins
+#   df_cat$Awards_Nom[i] = noms
+# }
+# df_cat = subset(df_cat, select=-c(Awards))
 
 ```
 
