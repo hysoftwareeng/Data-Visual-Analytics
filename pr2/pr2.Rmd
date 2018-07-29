@@ -307,8 +307,6 @@ labs(title = "Percentage of Training Set vs RMSE for Numeric Values With Transfo
 q2_rmse = min_rmse(df_result2)
 
 ```
-```
-
 
 **Q**: Explain which transformations you used and why you chose them.
 
@@ -329,7 +327,10 @@ Write code that converts genre, actors, directors, and other categorical variabl
 
 ```{r}
 # TODO: Build & evaluate model 3 (converted non-numeric variables only)
+
+df_cat = subset(df2, select=-colnames(df_numeric))
 ```
+
 
 **Q**: Explain which categorical variables you used, and how you encoded them into features.
 
