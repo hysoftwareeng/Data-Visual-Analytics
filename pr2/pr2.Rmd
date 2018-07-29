@@ -328,7 +328,28 @@ Write code that converts genre, actors, directors, and other categorical variabl
 ```{r}
 # TODO: Build & evaluate model 3 (converted non-numeric variables only)
 
-df_cat = subset(df2, select=c(Genre, Director, Writer, Actors, Country, Awards, Production, Gross))
+df_cat = subset(df2, select=c(Rated, Genre, Director, Writer, Actors, Country, Awards, Production, Language, Gross))
+###### Process Rated #############
+ratings = unlist(strsplit(df_cat$Rated, ','))
+ratings = tolower(gsub(' ', '', ratings))
+ratings = names(sort(table(ratings), decreasing = TRUE)[1:6])
+
+ratings_df = data.frame(matrix(nrow = nrow(df_cat), ncol = length(ratings)))
+colnames(ratings_df) = ratings
+df_cat$ratings_mod = tolower(gsub(' ', '', df_cat$Rated))
+if ("Rated" %in% colnames(df_cat)){
+  df_cat = subset(df_cat, select=-c(Rated))
+}
+
+ratings_df[,] = 0
+for (item in ratings) {
+  ratings_df[grep(item, df_cat[,"ratings_mod"]), item] = 1
+}
+colnames(ratings_df)[colnames(ratings_df) == "n/a"] = "notavailable"
+ratings_df = subset(ratings_df, select=-c(notavailable))
+
+df_cat = cbind(df_cat, ratings_df)
+df_cat = subset(df_cat, select=-c(ratings_mod))
 
 ###### Process Genre #############
 genres = unlist(strsplit(df_cat$Genre, ','))
@@ -450,55 +471,102 @@ df_cat = subset(df_cat, select=-c(countries_mod))
 ###### Process Production ##########
 productions = unlist(strsplit(df_cat$Production, ','))
 productions = tolower(gsub(' ', '', productions))
-productions = names(sort(table(productions), decreasing = TRUE)[1:6])
+productions = names(sort(table(productions), decreasing = TRUE)[1:6]) #n/a is in top 5, so select 6
 
+productions_df = data.frame(matrix(nrow = nrow(df_cat), ncol = length(productions)))
+colnames(productions_df) = productions
+df_cat$productions_mod = tolower(gsub(' ', '', df_cat$Production))
+if ("Production" %in% colnames(df_cat)){
+  df_cat = subset(df_cat, select=-c(Production))
+}
+
+productions_df[,] = 0
+for (item in productions) {
+  productions_df[grep(item, df_cat[,"productions_mod"]), item] = 1
+}
+
+colnames(productions_df)[colnames(productions_df) == "n/a"] = "notavailable"
+productions_df = subset(productions_df, select=-c(notavailable))
+
+df_cat = cbind(df_cat, productions_df)
+df_cat = subset(df_cat, select=-c(productions_mod))
 
 ###### Process Awards #############
 
-# df_cat$Awards_mod = tolower(df_cat$Awards)
-# df_cat$Awards_Split = strsplit(df_cat$Awards_mod, "\\,|\\ |\\.|\\&")
-# 
-# different_win_nominations=vector()
-# for (i in seq(1:nrow(df_cat))) {
-#   awards_vector = unlist(df_cat$Awards_Split[i])
-#   wins= 0
-#   noms = 0
-#   if ("win" %in% awards_vector) {
-#     index = which(awards_vector == "win")
-#     wins= wins + as.integer(awards_vector[index-1])
-#   }
-#   if ("wins" %in% awards_vector) {
-#     index = which(awards_vector == "wins")
-#     wins= wins + as.integer(awards_vector[index-1])
-#   }
-#   if ("won" %in% awards_vector) {
-#     index = which(awards_vector == "won")
-#     wins= wins + as.integer(awards_vector[index+1])
-#   }
-#   if ("nominated" %in% awards_vector) {
-#     index = which(awards_vector == "nominated")
-#     noms= noms + as.integer(awards_vector[index+2])
-#   }
-#   if ("nomination" %in% awards_vector) {
-#     index = which(awards_vector == "nomination")
-#     noms= noms + as.integer(awards_vector[index-1])
-#   }
-#   if ("nominations" %in% awards_vector) {
-#     index = which(awards_vector == "nominations")
-#     noms= noms + as.integer(awards_vector[index-1])
-#   }
-#   df_cat$Awards_Won[i] = wins
-#   df_cat$Awards_Nom[i] = noms
-# }
-# df_cat = subset(df_cat, select=-c(Awards))
+df_cat$Awards_mod = tolower(df_cat$Awards)
+df_cat$Awards_Split = strsplit(df_cat$Awards_mod, "\\,|\\ |\\.|\\&")
+
+different_win_nominations=vector()
+for (i in seq(1:nrow(df_cat))) {
+  awards_vector = unlist(df_cat$Awards_Split[i])
+  wins= 0
+  noms = 0
+  if ("win" %in% awards_vector) {
+    index = which(awards_vector == "win")
+    wins= wins + as.integer(awards_vector[index-1])
+  }
+  if ("wins" %in% awards_vector) {
+    index = which(awards_vector == "wins")
+    wins= wins + as.integer(awards_vector[index-1])
+  }
+  if ("won" %in% awards_vector) {
+    index = which(awards_vector == "won")
+    wins= wins + as.integer(awards_vector[index+1])
+  }
+  if ("nominated" %in% awards_vector) {
+    index = which(awards_vector == "nominated")
+    noms= noms + as.integer(awards_vector[index+2])
+  }
+  if ("nomination" %in% awards_vector) {
+    index = which(awards_vector == "nomination")
+    noms= noms + as.integer(awards_vector[index-1])
+  }
+  if ("nominations" %in% awards_vector) {
+    index = which(awards_vector == "nominations")
+    noms= noms + as.integer(awards_vector[index-1])
+  }
+  df_cat$Awards_Won[i] = wins
+  df_cat$Awards_Nom[i] = noms
+}
+df_cat = subset(df_cat, select=-c(Awards, Awards_mod, Awards_Split))
+
+###### Process Languages #############
+languages = unlist(strsplit(df_cat$Language, ','))
+languages = tolower(gsub(' ', '', languages))
+languages = names(sort(table(languages), decreasing = TRUE)[1:5])
+
+languages_df = data.frame(matrix(nrow = nrow(df_cat), ncol = length(languages)))
+colnames(languages_df) = languages
+df_cat$languages_mod = tolower(gsub(' ', '', df_cat$Language))
+if ("Language" %in% colnames(df_cat)){
+  df_cat = subset(df_cat, select=-c(Language))
+}
+
+languages_df[,] = 0
+for (item in languages) {
+  languages_df[grep(item, df_cat[,"languages_mod"]), item] = 1
+}
+
+df_cat = cbind(df_cat, languages_df)
+df_cat = subset(df_cat, select=-c(languages_mod)) 
+
+```
+
+```{r}
 
 ```
 
 
 **Q**: Explain which categorical variables you used, and how you encoded them into features.
 
-**A**: 
+**A**: For this task, I used the categorical variables: Rated, Genre, Director, Writer, Actors, Country, Awards and Production.
 
+First, I created a new dataframe for just the categorical variables selected above. 
+
+For Rated, I first split the strings of Rated in the dataframe and preprocessed the values by replacing spaces and making everything lower case. Then I grouped them and only retrieved the values of the top 5 most popular ratings. I also created a new modified rated column in the dataframe for pattern matching. Then,for each of these 5 ratings, I assigned a value of 1 to a new column with the rating name in the category dataframe, 0 otherwise. The intermediate modified rating column and the original Rated column were both removed, and the newly created columns were merged back to the category dataframe. A similiar process was done for Genre (top 10), Director (top 10), Writer (top 10), Actors (top 10), Country (top 5), Language(top 5).
+
+
+For wards, I first split the string for Awards into into string vectors. Then, I iterated all the rows in the dataframe one by one, initializing the number of wins and nominations to 0. Then unlisted the vector into strings. Then, I looked for keywords in the unlisted strings. I know from looking at the Awards column that the number precedes keywords "win" and "wins", and succeeds "won". So I looked for these keywords then found the number index position accordingly. These are then accumulated to the current wins. A similiar technique was used for nominations with the keywords "nomination", "nominations" and "nominated". These values are then set to two new columns in the category dataframe for the current row. 
 
 **Q**: What is the best mean test RMSE value you observed, and at what training set size? How does this compare with Task 2?
 
