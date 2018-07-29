@@ -197,11 +197,6 @@ Use Linear Regression to predict `Gross` based on available _numeric_ variables.
 
 ```{r, warning=FALSE}
 # TODO: Build & evaluate model 1 (numeric variables only)
-set.seed(100)
-loop_seeds = seq(11, 110, 10)
-
-df_numeric = select_if(df2, is.numeric)
-
 rmse_training = function(model){
   residual = residuals(model)
   RMSE=sqrt(mean(residual^2))
@@ -228,35 +223,49 @@ rmse_calculation = function(df_training, df_testing, percent, seed) {
   }
   mean_training = mean(vec_training)
   mean_testing = mean(vec_testing)
+  set.seed(100)
   return (c(mean_training, mean_testing))
 }
 
-#sample 20% of the data for testing, 80% for training
-df_randomized = df_numeric[sample(nrow(df_numeric)), ]
-df_testing = df_randomized[1:(0.2*nrow(df_randomized)), ]
-df_training = df_randomized[(nrow(df_testing)+1):nrow(df_randomized), ]
-
-percentages = seq(0.1, 1, by=0.1)
-vec_mean_training = vector(mode="numeric", length = 10)
-vec_mean_testing = vector(mode="numeric", length = 10)
-for (i in 1:length(percentages)) {
-  model_result = rmse_calculation(df_training, df_testing, percentages[i])
-  vec_mean_training[i] = model_result[1]
-  vec_mean_testing[i] = model_result[2]
+model_helper = function(df_data) {
+  #sample 20% of the data for testing, 80% for training
+  df_randomized = df_data[sample(nrow(df_data)), ]
+  df_testing = df_randomized[1:(0.2*nrow(df_randomized)), ]
+  df_training = df_randomized[(nrow(df_testing)+1):nrow(df_randomized), ]
+  
+  percentages = seq(0.1, 1, by=0.1)
+  vec_mean_training = vector(mode="numeric", length = 10)
+  vec_mean_testing = vector(mode="numeric", length = 10)
+  for (i in 1:length(percentages)) {
+    model_result = rmse_calculation(df_training, df_testing, percentages[i])
+    vec_mean_training[i] = model_result[1]
+    vec_mean_testing[i] = model_result[2]
+  }
+  
+  df_result = data.frame(percentages*100, vec_mean_training, vec_mean_testing)
+  colnames(df_result) = c("percentage", "training_RMSE", "testing_RMSE")
+  return (df_result)
 }
 
-df_result = data.frame(percentages*100, vec_mean_training, vec_mean_testing)
-colnames(df_result) = c("percentage", "training_RMSE", "testing_RMSE")
+min_rmse = function(df_result) {
+  min_training_rmse = min(df_result$training_RMSE)
+  min_testing_rmse = min(df_result$testing_RMSE)
+  return (c(min_training_rmse, min_testing_rmse))
+}
+
+set.seed(100)
+loop_seeds = seq(11, 110, 10)
+
+df_numeric = select_if(df2, is.numeric)
+df_result1 = model_helper(df_numeric)
 ```
 
 ```{r}
-ggplot(df_result, aes(percentage)) + geom_line(aes(y=training_RMSE,color="Training Set"))+
+ggplot(df_result1, aes(percentage)) + geom_line(aes(y=training_RMSE,color="Training Set"))+
 geom_line(aes(y=testing_RMSE,color="Testing Set"))+
 labs(title = "Percentage of Training Set vs RMSE for Numeric Values", x= "Percentage of Training size", y = "RMSE")
 
-min_training_rmse = min(df_result$training_RMSE)
-min_testing_rmse = min(df_result$testing_RMSE)
-
+q1_rmse = min_rmse(df_result1)
 ```
 
 
@@ -274,19 +283,45 @@ min_testing_rmse = min(df_result$testing_RMSE)
 
 Try to improve the prediction quality from **Task 1** as much as possible by adding feature transformations of the numeric variables. Explore both numeric transformations such as power transforms and non-numeric transformations of the numeric variables like binning (e.g. `is_budget_greater_than_3M`).
 
-```{r}
+```{r, warning=FALSE}
 # TODO: Build & evaluate model 2 (transformed numeric variables only)
+df_q2 = df_numeric
+df_q2$imdbVotes = df_q2$imdbVotes^0.6
+df_q2$imdbRating = df_q2$imdbRating^4
+df_q2$tomatoRating = df_q2$tomatoRating^8
+df_q2$tomatoReviews = df_q2$tomatoReviews^2
+df_q2$tomatoUserRating = df_q2$tomatoUserRating^1.2
+df_q2$tomatoMeter = df_q2$tomatoMeter^2
+df_q2$Budget = df_q2$Budget^1.5
+
+df_q2$Runtime_Bin = as.numeric(cut(df_q2$Runtime, 6))
+df_q2$Budget_Bin = as.numeric(cut(df_q2$Budget, 6))
+df_result2 = model_helper(df_q2)
 ```
+
+```{r}
+ggplot(df_result2, aes(percentage)) + geom_line(aes(y=training_RMSE,color="Training Set"))+
+geom_line(aes(y=testing_RMSE,color="Testing Set"))+
+labs(title = "Percentage of Training Set vs RMSE for Numeric Values With Transformations", x= "Percentage of Training size", y = "RMSE")
+
+q2_rmse = min_rmse(df_result2)
+
+```
+```
+
 
 **Q**: Explain which transformations you used and why you chose them.
 
-**A**: 
+**A**: I applied both numeric and non-numeric transformations. For numeric transformations, I performed power transformations to fields imdbVotes, imdbRating, tomatoRating, tomatoReviews, tomatoUserRating, tomatoMeter and Budget. Out of all the numeric fields, various trial and error with different power values revealed the relationships between these numeric fields and "Gross" could be somewhat linear with various degrees of power transformations. I did not find a suitable case to apply the log transformation to any of the numeric fields as the resultant didn't seem to provide a better relationship for analysis.
+
+As for non-numeric transformations, I binned both "Runtime" and "Budget". These fields have a large range of values, and binning them will make the relationship with "Gross" easier to analyze. 
 
 
 **Q**: How did the RMSE change compared to Task 1?
 
-**A**: 
+**A**: First, the minimum RMSE for the testing set is 83844040 occuring at when the training set is 100%, and the minimum RMSE for the training set is 10667599 occuring at 10% of the training set. 
 
+Compared to Task 1, both RMSEs are now less with the feature transformations, the value of the testing set in Task 1 was 83980311, and 11769783 for the training set. 
 
 ## 3. Non-numeric variables
 
